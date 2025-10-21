@@ -1,0 +1,636 @@
+<!-- ================ Main Site Scripts ================ -->
+<!-- CLUDO META TAG POPULATE -->
+<script defer>
+  (() => {
+    const DELIMITER = "|";
+    const OVERWRITE_EXISTING = false;
+
+    const normalize = s => (s || "").replace(/\s+/g, " ").trim();
+
+    const setMeta = (name, value) => {
+      if (!name || !value) return;
+      const head = document.head;
+      let meta = head.querySelector(`meta[name="${CSS.escape(name)}"]`);
+      if (meta) {
+        const existing = meta.getAttribute("content") || "";
+        if (!OVERWRITE_EXISTING && existing.trim() !== "") {
+          console.log(`[MetaTags] Skipping ${name} (already has content: "${existing}")`);
+          return;
+        }
+      } else {
+        meta = document.createElement("meta");
+        meta.setAttribute("name", name);
+        head.appendChild(meta);
+        console.log(`[MetaTags] Created new <meta name="${name}">`);
+      }
+      meta.setAttribute("content", value);
+      console.log(`[MetaTags] Updated <meta name="${name}"> → "${value}"`);
+    };
+
+    const run = () => {
+      const root = document.getElementById("meta-tags");
+      if (!root) {
+        console.log("[MetaTags] #meta-tags not found. Script exiting.");
+        return;
+      }
+
+      console.log("[MetaTags] Found #meta-tags, scanning…");
+
+      const sections = root.querySelectorAll(':scope div[id^="meta-"]');
+
+      sections.forEach(section => {
+        const sectionId = section.id || "(no id)";
+        if (section.querySelector(".w-dyn-empty")) {
+          console.log(`[MetaTags] Skipping ${sectionId} (empty dataset)`);
+          return;
+        }
+
+        const values = Array.from(section.querySelectorAll(".w-embed"))
+                .map(el => normalize(el.textContent))
+                .filter(Boolean);
+
+        if (!values.length) {
+          console.log(`[MetaTags] No .w-embed values found for ${sectionId}`);
+          return;
+        }
+
+        const content = Array.from(new Set(values)).join(DELIMITER);
+        const name = normalize(section.getAttribute("data-meta-name") || section.id.replace(/^meta-/, ""));
+        if (!name) {
+          console.log(`[MetaTags] Could not determine meta name for ${sectionId}`);
+          return;
+        }
+
+        console.log(`[MetaTags] ${sectionId} → ${name} = "${content}"`);
+        setMeta(name, content);
+      });
+    };
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", run);
+    } else {
+      run();
+    }
+  })();
+</script>
+<!-- END CLUDO -->
+
+<!-- Finsweet Attributes -->
+<script async type="module"
+        src="https://cdn.jsdelivr.net/npm/@finsweet/attributes@2/attributes.js"
+        fs-list
+></script>
+<script>
+  document.documentElement.setAttribute('fs-list-debug','');
+</script>
+
+<!-- CLUDO -->
+<script>
+  window.cludoConfig = {
+    /** Required properties **/
+    customerId: 10000903,
+    engineId: 10003006,
+    language: "en", //Change this to reflect the language of the search
+    searchUrl: "/search-results", //Search URL - change this to reflect the actual search URL
+    searchInputSelectors: ["#cludo-search-input"], //Array of CSS selectors for input fields that should trigger search
+  };
+</script>
+<script src="https://customer.cludo.com/scripts/bundles/search-script.min.js" type="text/javascript"></script>
+<script src="https://customer.cludo.com/templates/rich-inline/v1.0/dist/js/cludo-search-results.js" type="text/javascript" onload=""></script>
+
+<!-- ================ End Main Site Scripts ================ -->
+
+<!-- ================ Component and Task Queue Scripts ================ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.7/purify.min.js" integrity="sha512-78KH17QLT5e55GJqP76vutp1D2iAoy06WcYBXB6iBCsmO6wWzx0Qdg8EDpm8mKXv68BcvHOyeeP4wxAL0twJGQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<!-- [Component] Accordion from Mast 2.3 -->
+<script src="https://cdn.jsdelivr.net/gh/nocodesupplyco/mast@latest/accordion.min.js"></script>
+
+<!-- Task Queue -->
+
+<script>
+
+  /* Queue all tasks (safe to run before or after the readyQueue loader) */
+  (window.__readyQueue = window.__readyQueue || []).push(
+
+          // Add utils
+          {
+            name: "setupUtils",
+            fn: () => {
+              const rq = window.__readyQueue;
+              rq.utils = rq.utils || {};
+
+              /**
+               * @function sanitize
+               * @description
+               * Cleans a string input using DOMPurify (if available) or a safe fallback.
+               * Removes HTML, scripts, control chars, and trims whitespace.
+               * Ensures the result is safe for use in URLs, attributes, or plain text.
+               *
+               * Behavior:
+               * - If DOMPurify is present: strips all tags/attrs via `sanitize(str, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] })`.
+               * - If DOMPurify is missing: removes control chars, strips HTML via regex, trims, and caps to 200 chars.
+               *
+               * @param {string} str - Input string to sanitize.
+               * @returns {string} Safe, plain, trimmed string.
+               */
+              const hasPurify = !!window.DOMPurify;
+              const purifySanitize = (str) =>
+                      window.DOMPurify.sanitize(String(str), {
+                        ALLOWED_TAGS: [],
+                        ALLOWED_ATTR: [],
+                        RETURN_TRUSTED_TYPE: false
+                      }).trim();
+
+              const fallbackSanitize = (str) => String(str || "")
+                      .replace(/[\u0000-\u001F\u007F]/g, "") // strip control chars
+                      .replace(/<[^>]*>/g, "")               // strip HTML tags
+                      .trim()
+                      .slice(0, 200);                        // cap length defensively
+
+              rq.utils.sanitize = (str) => (hasPurify ? purifySanitize(str) : fallbackSanitize(str));
+
+              /**
+               * @function paramsFromRaw
+               * @description
+               * Parses a raw query-like string (e.g. from a data-* attribute) into a URLSearchParams object.
+               * Automatically determines if it looks like key/value pairs (contains "=" or "&").
+               * Sanitizes both keys and values via sanitize().
+               * Falls back to treating the string as a "q" parameter if no pairs are detected.
+               *
+               * Example inputs:
+               *   "office=Boston&role=Partner" → URLSearchParams("office=Boston&role=Partner")
+               *   "executive search" → URLSearchParams("q=executive search")
+               *
+               * @param {string} raw - Raw data string (possibly unsafe or unstructured).
+               * @returns {URLSearchParams} Parsed and sanitized parameters.
+               */
+              rq.utils.paramsFromRaw = (raw) => {
+                const clean = rq.utils.sanitize(raw);
+                const params = new URLSearchParams();
+
+                // Detect "key=value" style pairs
+                const looksLikePairs = /=/.test(clean) && /[=&]/.test(clean);
+                if (looksLikePairs) {
+                  clean.split("&").forEach(pair => {
+                    if (!pair) return;
+                    const [kRaw, vRaw = ""] = pair.split("=");
+                    const k = rq.utils.sanitize(kRaw);
+                    const v = rq.utils.sanitize(vRaw);
+                    // allow only safe alphanumeric/underscore/dash keys
+                    if (/^[a-z0-9_-]{1,40}$/i.test(k)) params.set(k, v);
+                  });
+                } else if (clean) {
+                  params.set("q", clean);
+                }
+
+                return params;
+              };
+
+              /**
+               * @function addQueryToDescendantLink
+               * @description
+               * For each element with a given data-* attribute, find exactly one target <a>
+               * (either via a per-element selector, or itself if it's an <a>, or the only
+               * descendant <a>), then append sanitized query params to its href.
+               *
+               * - If the attribute value looks like "key=val&x=y", those pairs are used.
+               * - Otherwise, it sets { [param]: "<cleaned value>" }.
+               *
+               * Options:
+               *   attr            {string}  Data attribute to read (e.g., "data-kf-office-query")
+               *   param           {string}  Default param key to use when not key/value pairs (e.g., "office")
+               *   container       {Element} Optional root to search under (default: document)
+               *   targetSelectorAttr {string} Per-element attribute that can specify a link selector (default: "data-kf-target-link")
+               *   requireSingle   {boolean} Require exactly one link (default: true)
+               *   allowSelfAnchor {boolean} Use element itself if it's an <a> (default: true)
+               */
+              rq.utils.addQueryToDescendantLink = (opts) => {
+                const {
+                  attr,
+                  param,
+                  container = document,
+                  targetSelectorAttr = "data-kf-target-link",
+                  requireSingle = true,
+                  allowSelfAnchor = true
+                } = opts || {};
+
+                const sanitize = rq.utils.sanitize || ((s) => String(s || "").trim());
+
+                const nodeLabel = (el) => {
+                  if (!(el instanceof Element)) return String(el);
+                  const id = el.id ? `#${el.id}` : "";
+                  const cls = el.className && typeof el.className === "string"
+                          ? "." + el.className.trim().split(/\s+/).slice(0,2).join(".")
+                          : "";
+                  return `${el.tagName.toLowerCase()}${id}${cls}`;
+                };
+
+                const parseParams = (raw) => {
+                  const cleaned = sanitize(raw);
+                  const params = new URLSearchParams();
+                  if (!cleaned) return params;
+
+                  // If it looks like key=value pairs, parse them; else use the provided param key
+                  const looksLikePairs = /=/.test(cleaned) && /[=&]/.test(cleaned);
+                  if (looksLikePairs) {
+                    cleaned.split("&").forEach(pair => {
+                      if (!pair) return;
+                      const [kRaw, vRaw = ""] = pair.split("=");
+                      const k = sanitize(kRaw);
+                      const v = sanitize(vRaw);
+                      if (/^[a-z0-9_-]{1,40}$/i.test(k)) params.set(k, v);
+                    });
+                  } else if (param) {
+                    params.set(param, cleaned);
+                  }
+                  return params;
+                };
+
+                container.querySelectorAll(`[${attr}]`).forEach(el => {
+                  const raw = el.getAttribute(attr);
+                  const cleaned = sanitize(raw);
+
+                  if (!cleaned) {
+                    console.warn(`[addQueryToDescendantLink] Empty/invalid ${attr} on ${nodeLabel(el)}; skipping.`);
+                    return;
+                  }
+
+                  // Choose target link(s)
+                  const explicitSel = el.getAttribute(targetSelectorAttr);
+                  let links = [];
+
+                  if (explicitSel) {
+                    links = Array.from(el.querySelectorAll(explicitSel));
+                  } else if (allowSelfAnchor && el.matches("a")) {
+                    links = [el];
+                  } else {
+                    links = Array.from(el.querySelectorAll("a"));
+                  }
+
+                  if (!links.length) {
+                    console.warn(`[addQueryToDescendantLink] No target <a> for ${nodeLabel(el)} (attr ${attr}); skipping.`);
+                    return;
+                  }
+                  if (requireSingle && links.length > 1) {
+                    console.warn(
+                            `[addQueryToDescendantLink] Multiple links for ${nodeLabel(el)} (attr ${attr});` +
+                            ` add ${targetSelectorAttr} to disambiguate. Skipping.`
+                    );
+                    return;
+                  }
+
+                  const a = links[0];
+                  const href = a.getAttribute("href") || "";
+                  let url;
+                  try {
+                    url = new URL(href, window.location.href);
+                  } catch {
+                    console.warn(`[addQueryToDescendantLink] Invalid href on ${nodeLabel(a)}: "${href}"; skipping.`);
+                    return;
+                  }
+
+                  const newParams = parseParams(cleaned);
+                  for (const [k, v] of newParams.entries()) {
+                    url.searchParams.set(k, v);
+                  }
+                  a.setAttribute("href", url.toString());
+                });
+              };
+
+
+
+            }
+          },
+
+          // Add target/_blank + rel to specific domains (jQuery-based)
+          {
+            name: "updateLinkTargetsForDomains",
+            fn: () => {
+              const $ = window.jQuery;
+              if (!$) {
+                console.warn("[updateLinkTargetsForDomains] jQuery not found; skipping.");
+                return;
+              }
+
+              // ---- Configuration ----
+              const config = {
+                matchDomains: ["google.com", "*.google.com"],
+                ignoreSelectors: [".w-nav", "[data-no-link-scan]", ".korn-ferry-mast-library--cc-footer"],
+                skipAttr: "data-skip-link-update"
+              };
+
+              const hasSkipAttr = (el) => $(el).attr(config.skipAttr) === "true";
+
+              const isInsideIgnoredContainer = (el) =>
+                      config.ignoreSelectors.some(sel => el.closest(sel).length);
+
+              const isProcessableHref = (href) => {
+                if (!href) return false;
+                const lower = href.trim().toLowerCase();
+                return !(
+                        lower.startsWith("#") ||
+                        lower.startsWith("javascript:") ||
+                        lower.startsWith("mailto:") ||
+                        lower.startsWith("tel:") ||
+                        lower.startsWith("data:")
+                );
+              };
+
+              const makeDomainMatcher = (patterns) => {
+                const normalized = patterns
+                        .map(p => (p || "").trim().toLowerCase())
+                        .filter(Boolean)
+                        .map(p => p.startsWith("*.") ? { type: "wildcard", value: p.slice(2) } : { type: "exact", value: p });
+
+                return (host) => {
+                  if (!host) return false;
+                  const h = host.toLowerCase();
+                  if (normalized.some(n => n.type === "exact" && n.value === h)) return true;
+                  for (const n of normalized) {
+                    if (n.type !== "wildcard") continue;
+                    if (h.length > n.value.length && h.endsWith("." + n.value)) return true;
+                  }
+                  return false;
+                };
+              };
+
+              const matchesDomain = makeDomainMatcher(config.matchDomains);
+
+              const ensureRelTokens = (el, tokens) => {
+                const current = ($(el).attr("rel") || "").split(/\s+/).filter(Boolean);
+                const set = new Set(current);
+                tokens.forEach(t => set.add(t));
+                $(el).attr("rel", Array.from(set).join(" "));
+              };
+
+              const processLinks = () => {
+                $("a[href]").each(function () {
+                  const a = this;
+                  if (hasSkipAttr(a)) return;
+                  if (isInsideIgnoredContainer($(a))) return;
+
+                  const href = $(a).attr("href");
+                  if (!isProcessableHref(href)) return;
+
+                  let host = "";
+                  try {
+                    host = new URL(href, window.location.href).hostname;
+                  } catch {
+                    return;
+                  }
+
+                  if (!matchesDomain(host)) return;
+
+                  $(a).attr("target", "_blank");
+                  ensureRelTokens(a, ["noopener", "noreferrer"]);
+                });
+              };
+
+              // Run once on readyQueue drain
+              processLinks();
+            }
+          },
+
+          // Add mailto: to links with data-kf-email-href
+          {
+            name: "ensureMailtoOnEmailLinks",
+            fn: () => {
+              document.querySelectorAll('a[data-kf-email-href]').forEach(anchor => {
+                const email = anchor.getAttribute('href');
+                if (email && !email.startsWith('mailto:')) {
+                  anchor.setAttribute('href', 'mailto:' + email);
+                }
+              });
+            }
+          },
+
+          // Modal <dialog> wiring
+          {
+            name: "wireDialogs",
+            fn: () => {
+              const dialogs = document.querySelectorAll("dialog");
+              if (!dialogs.length) return;
+
+              const showButtons = document.querySelectorAll("dialog + button");
+              const closeButtons = document.querySelectorAll("dialog button");
+
+              dialogs.forEach((dialog, index) => {
+                const showBtn = showButtons[index];
+                const closeBtn = closeButtons[index];
+
+                if (showBtn) {
+                  showBtn.addEventListener("click", () => dialog.showModal(), { once: false });
+                }
+                if (closeBtn) {
+                  closeBtn.addEventListener("click", () => dialog.close(), { once: false });
+                }
+
+                // Click outside to close
+                dialog.addEventListener("click", (e) => {
+                  const r = dialog.getBoundingClientRect();
+                  if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) {
+                    dialog.close();
+                  }
+                });
+              });
+            }
+          },
+
+          // Update footer year
+          {
+            name: "updateFooterYear",
+            fn: () => {
+              const year = String(new Date().getFullYear());
+              document.querySelectorAll('[data-footer-year]').forEach(el => { el.textContent = year; });
+            }
+          },
+
+          // Office card city/state comma logic
+          {
+            name: "updateOfficeCardCityState",
+            fn: () => {
+              document.querySelectorAll('p[data-city-string="true"]').forEach(container => {
+                const city = container.querySelector('[data-kf-office="city"]');
+                const state = container.querySelector('[data-kf-office="state"]');
+                const comma = container.querySelector('[data-kf-office="optional-comma"]');
+                const space = container.querySelector('[data-kf-office="optional-space"]');
+
+                const isVisibleAndHasText = el => el && el.textContent.trim() !== '' && el.offsetParent !== null;
+
+                const hasCity = isVisibleAndHasText(city);
+                const hasState = isVisibleAndHasText(state);
+
+                if (comma) {
+                  if (hasCity && hasState) {
+                    comma.style.display = '';
+                    if (space) space.style.display = '';
+                  } else {
+                    comma.style.display = 'none';
+                    if (space) space.style.display = 'none';
+                  }
+                }
+              });
+            }
+          },
+
+          // Close other accordions of the same data-kf-accordion-type
+          {
+            name: "accordionCloseSiblings",
+            fn: () => {
+              // Only register once per page load (task name dedupe covers us)
+              const esc = (s) => (window.CSS && CSS.escape) ? CSS.escape(s) : String(s).replace(/"/g, '\\"');
+              document.addEventListener('toggle', (e) => {
+                const d = e.target;
+                if (!(d instanceof HTMLDetailsElement)) return;
+                if (!d.hasAttribute('data-kf-accordion-type')) return;
+                if (!d.open) return; // only when it just opened
+
+                const type = d.getAttribute('data-kf-accordion-type') || '';
+                const selector = `details[data-kf-accordion-type="${esc(type)}"]`;
+
+                document.querySelectorAll(selector).forEach(other => {
+                  if (other === d || !other.open) return;
+
+                  other.setAttribute('role', 'unset');
+
+                  const summary = other.querySelector('summary');
+                  if (summary && typeof summary.click === 'function') {
+                    summary.click();
+                  } else {
+                    other.open = false;
+                  }
+                });
+              }, true);
+            }
+          },
+
+          // Update see all consultants button query
+          {
+            name: "applyQueryParamWhitelistedAttrs",
+            fn: () => {
+              const rq = window.__readyQueue || {};
+              const utils = (rq && rq.utils) || {};
+              const addQueryToDescendantLink = utils.addQueryToDescendantLink;
+
+              if (typeof addQueryToDescendantLink !== "function") {
+                console.warn("[applyQueryParamWhitelistedAttrs] Missing utils.addQueryToDescendantLink; did setupUtils run?");
+                return;
+              }
+
+              // Whitelist of attributes and their default param key when not key=value pairs
+              const ATTR_MAP = [
+                { attr: "data-kf-office-query",  param: "office" },
+                { attr: "data-kf-region-query",  param: "region" },
+                // add more here as needed
+              ];
+
+              ATTR_MAP.forEach(({ attr, param }) => {
+                addQueryToDescendantLink({ attr, param });
+              });
+            }
+          }
+          /* End Pushing to Queue */
+  );
+
+  /*=====================================================================*/
+
+
+  /**
+   * readyQueue: post-DOM-ready task runner with duplicate-name safety
+   * - Accepts early pushes to window.__readyQueue (Array) before this loader runs
+   * - Wraps each task in try/catch; awaits async tasks
+   * - Skips duplicate names with a warning; anonymous tasks still run (warned)
+   *
+   * Usage:
+   *   (window.__readyQueue = window.__readyQueue || []).push({ name: "decorateNav", fn: () => {...} })
+   *   (window.__readyQueue = window.__readyQueue || []).push(function highlightCTAs() { ... })
+   *   __readyQueue.push({ name: "setupFooter", fn: async () => {...} })
+   */
+  (function (w, d) {
+    const KEY = "__readyQueue";
+    const early = w[KEY] || [];   // Any early pushed tasks
+    const q = [];                 // Internal queue
+    const registered = new Set(); // For dedupe by name
+    let draining = false;
+    let ready = d.readyState !== "loading";
+
+    // Utility: check if something is a Promise
+    function isPromise(x) { return !!x && typeof x.then === "function"; }
+
+    // Normalize input: function or { fn, name }
+    function normalize(task) {
+      if (typeof task === "function") {
+        return { fn: task, name: task.name || "" };
+      }
+      if (task && typeof task.fn === "function") {
+        return { fn: task.fn, name: task.name || task.fn.name || "" };
+      }
+      console.error("[readyQueue] Ignored invalid task:", task);
+      return null;
+    }
+
+    function ensureNameOrWarn(t) {
+      if (!t.name) {
+        console.warn("[readyQueue] Task has no name; duplicate protection cannot apply. Provide a { name, fn } or a named function.");
+      }
+    }
+
+    function register(t) {
+      if (t.name) {
+        if (registered.has(t.name)) {
+          console.warn(`[readyQueue] Skipping duplicate task name "${t.name}".`);
+          return false;
+        }
+        registered.add(t.name);
+      } else {
+        ensureNameOrWarn(t);
+      }
+      q.push(t);
+      return true;
+    }
+
+    async function drain() {
+      if (draining) return;
+      draining = true;
+      console.log('draining tasks');
+      while (q.length) {
+        const { fn, name } = q.shift();
+        try {
+          const out = fn();
+          if (isPromise(out)) await out;
+        } catch (err) {
+          console.error(name ? `[readyQueue] Error in "${name}":` : "[readyQueue] Task error:", err);
+        }
+      }
+      draining = false;
+    }
+
+    function push(...tasks) {
+      for (const task of tasks) {
+        const t = normalize(task);
+        if (!t) continue;
+        if (!register(t)) continue;
+      }
+      if (ready) drain();
+    }
+
+    if (!ready) {
+      d.addEventListener("DOMContentLoaded", () => { ready = true; drain(); }, { once: true });
+    }
+
+    // Expose API
+    const api = (w[KEY] = {
+      push,                 // Add task (fn or { fn, name })
+      drain,                // Force run pending tasks
+      has(name) { return registered.has(name); },
+      get length() { return q.length; },
+      get isReady() { return ready; }
+    });
+
+    // Process any early tasks
+    for (let i = 0; i < early.length; i++) push(early[i]);
+    if (ready) drain();
+  })(window, document);
+
+</script>

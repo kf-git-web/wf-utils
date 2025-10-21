@@ -1,0 +1,411 @@
+<!--This is now outdated see tasks-and-queue.js -->
+<script>
+    /*
+     * KF ReadyQueue + Generic Form Loader
+     *
+     * Expects containers like:
+     *   <div class="kf-mktoform"
+     *        data-kf-mktoform="1234"
+     *        data-enable-form="true"
+     *        data-redirect="false" or "true" (default: false)
+     *        data-redirect-url="https://www.kornferry.com/contact" (optional, no redirect should occur if not set)
+     *   </div>
+     *
+     * Rules:
+     * - If a .kf-mktoform already contains a <form> element. i.e., form instantiated already,
+     *   do NOT proceed for that container and log a warning.
+     * - If data-redirect="true" AND data-redirect-url is provided, redirect there on success.
+     *   Otherwise, do NOT redirect (default is to NOT redirect).
+     */
+
+    (function () {
+        const Q = (window.__readyQueue = window.__readyQueue || []);
+
+        Q.push({
+            name: "mktoGenericFormLoader",
+            fn: function () {
+                const containers = document.querySelectorAll(".kf-mktoform");
+                if (!containers.length) {
+                    console.debug("[mktoform] No .kf-mktoform containers found; nothing to do.");
+                    return;
+                }
+
+                // --- configuration (hardcoded Marketo details) ---
+                const MUNCHKIN = "251-OLR-958";
+                const INSTANCE = "//discover.kornferry.com";
+
+                // --- tiny helpers ---
+                const parseBool = (v) => typeof v === "string" && v.toLowerCase() === "true";
+
+                function hide(el) {
+                    if (!el) return;
+                    el.setAttribute("hidden", "");
+                    el.style.display = "none";
+                    el.classList.add("hidden");
+                }
+
+                function show(el) {
+                    if (!el) return;
+                    el.removeAttribute("hidden");
+                    el.style.removeProperty("display");
+                    el.classList.remove("hidden");
+                }
+
+                function findVideoTarget(container) {
+                    const sel = container.getAttribute("data-video-target");
+                    const el = sel ? document.querySelector(sel) : container.querySelector("[data-kf-video]");
+                    return el || null;
+                }
+
+                function enableAutoplayParams(url) {
+                    try {
+                        const u = new URL(url, window.location.origin);
+                        const host = u.hostname.toLowerCase();
+                        if (host.includes("youtube.com") || host.includes("youtu.be")) {
+                            if (!u.searchParams.has("autoplay")) u.searchParams.set("autoplay", "1");
+                            if (!u.searchParams.has("mute")) u.searchParams.set("mute", "1");
+                            if (!u.searchParams.has("playsinline")) u.searchParams.set("playsinline", "1");
+                        } else if (host.includes("vimeo.com")) {
+                            if (!u.searchParams.has("autoplay")) u.searchParams.set("autoplay", "1");
+                            if (!u.searchParams.has("muted")) u.searchParams.set("muted", "1");
+                            if (!u.searchParams.has("playsinline")) u.searchParams.set("playsinline", "1");
+                        }
+                        return u.toString();
+                    } catch (e) {
+                        return url;
+                    }
+                }
+
+                function showVideoAndHideForm(container, targetFormId) {
+                    const formEl = container.querySelector("#" + CSS.escape(targetFormId));
+                    const videoWrap = findVideoTarget(container);
+
+                    if (videoWrap) {
+                        const iframe = videoWrap.querySelector("iframe");
+                        if (iframe) {
+                            const src = iframe.getAttribute("src");
+                            const dataSrc = iframe.getAttribute("data-src");
+                            if (!src && dataSrc) {
+                                const finalSrc = iframe.hasAttribute("data-autoplay")
+                                    ? enableAutoplayParams(dataSrc)
+                                    : dataSrc;
+                                iframe.setAttribute("src", finalSrc);
+                            } else if (src && iframe.hasAttribute("data-autoplay")) {
+                                iframe.setAttribute("src", enableAutoplayParams(src));
+                            }
+                        }
+                        show(videoWrap);
+                        container.classList.add("is-submitted");
+                    }
+                    hide(formEl);
+                }
+
+                // --- main loop per container ---
+                containers.forEach((container) => {
+                    // Only run when explicitly enabled
+                    const enabled = container.getAttribute("data-enable-form");
+                    if (!parseBool(enabled)) {
+                        console.debug("[mktoform] data-enable-form is not true; skipping this container.", container);
+                        return;
+                    }
+
+                    if (container.__kfMktoInit) {
+                        console.debug("[mktoform] already initialized; skipping.", container);
+                        return;
+                    }
+
+                    // If any <form> already exists inside, abort for this container
+                    const preExistingForm = container.querySelector("form");
+                    if (preExistingForm) {
+                        console.warn("[mktoform] Container already has a <form>; not instantiating Mkto form.", container);
+                        return;
+                    }
+
+                    const formIdAttr = container.getAttribute("data-kf-mktoform");
+                    const formId = formIdAttr && String(formIdAttr).trim();
+                    if (!formId || !/^\d+$/.test(formId)) {
+                        console.error("[mktoform] data-kf-mktoform missing or not an integer.", container);
+                        return;
+                    }
+
+                    // mark init (only after passing pre-checks)
+                    container.__kfMktoInit = true;
+
+                    const targetFormId = "mktoForm_" + formId;
+
+                    // Create a target <form> so Mkto renders where we want
+                    const mount = document.createElement("form");
+                    mount.id = targetFormId;
+                    mount.setAttribute("data-kf-generated", "true");
+                    container.appendChild(mount);
+
+                    // Respect optional video block (hide initially if present)
+                    const localVideo = findVideoTarget(container);
+                    if (localVideo) hide(localVideo);
+
+                    // Redirect flags
+                    const redirectFlag = parseBool(container.getAttribute("data-redirect") || "false");
+                    const redirectUrl = (container.getAttribute("data-redirect-url") || "").trim();
+
+                    function wireHooks(form) {
+                        try {
+                            form.onValidate(function (isValid) {
+                                console.debug("[mktoform] onValidate valid=%o", isValid);
+                            });
+
+                            form.onSuccess(function (_values, _followUpUrl) {
+                                // Redirect only if explicitly enabled AND a redirect URL is set.
+                                if (redirectFlag && redirectUrl) {
+                                    console.info("[mktoform] onSuccess -> redirecting to", redirectUrl);
+                                    window.location.assign(redirectUrl);
+                                    return false; // prevent Mkto default thank-you
+                                }
+
+                                // Otherwise, do NOT redirect; show video and hide form if available.
+                                console.info("[mktoform] onSuccess -> no redirect; showing video / hiding form.");
+                                showVideoAndHideForm(container, targetFormId);
+                                return false; // always prevent default
+                            });
+
+                            const formElem = form.getFormElem()[0];
+
+                            // remove the first <style> tag that Mkto injects (if present)
+                            const styleTag = formElem.querySelector("style");
+                            if (styleTag) styleTag.remove();
+
+                            // restyle submit button if present
+                            const submitBtn = formElem.querySelector('button[type="submit"]');
+                            if (submitBtn) submitBtn.classList.add("btn");
+
+                            // handy debug helpers
+                            container.__kfMkto = {
+                                form,
+                                dump() { console.log("[mktoform] values", form.vals()); },
+                                set(obj) { form.setValues(obj); },
+                                submit() { form.submit(); },
+                                showVideo() { showVideoAndHideForm(container, targetFormId); }
+                            };
+
+                            console.log("[mktoform] Form wired and ready (#%s).", formId);
+                        } catch (e) {
+                            console.error("[mktoform] wiring hooks failed", e);
+                        }
+                    }
+
+                    function loadForm() {
+                        if (!window.MktoForms2) {
+                            console.error("[mktoform] MktoForms2 not found. Ensure Marketo Forms2 is preloaded.");
+                            return;
+                        }
+
+                        try {
+                            window.MktoForms2.loadForm(INSTANCE, MUNCHKIN, Number(formId), function (form) {
+                                wireHooks(form);
+                            });
+                        } catch (e) {
+                            console.error("[mktoform] loadForm threw", e);
+                        }
+                    }
+
+                    loadForm();
+                });
+            }
+        });
+    })();
+</script>
+
+
+
+<!-- Old -->
+<script>
+    /*
+     * KF ReadyQueue + Generic Form Loader
+     *
+     * Expects a container like:
+     *   <div class="kf-mktoform"
+     *        data-kf-mktoform="1234"
+     *        data-enable-form="true"
+     *        data-redirect="false" or "true" (default: false)
+     *        data-redirect-url="https://www.kornferry.com/contact" (optional, no redirect should occur if not set)
+     *   </div>
+     *
+     * Should check if .kf-mktoform has a <form> element not instantiated in it. If there is a <form>, it should not proceed and throw a warning.
+     *
+     */
+    (function () {
+        const Q = (window.__readyQueue = window.__readyQueue || []);
+
+        Q.push({
+            name: "eventsWebinarsFormLoader",
+            fn: function () {
+                const container = document.getElementById('events-and-webinars-form');
+                if (!container) {
+                    console.warn('[mktoform] #events-and-webinars-form not found. Abort.');
+                    return;
+                }
+
+                // Only run when explicitly enabled
+                const enabled = container.getAttribute('data-enable-form');
+                if (!enabled || enabled.toLowerCase() !== 'true') {
+                    console.debug('[mktoform] data-enable-form is not true; skipping.');
+                    return;
+                }
+
+                if (container.__kfMktoInit) {
+                    console.debug('[mktoform] already initialized; skipping.');
+                    return;
+                }
+                container.__kfMktoInit = true;
+
+                const formIdAttr = container.getAttribute('data-kf-mktoform');
+                const formId = formIdAttr && String(formIdAttr).trim();
+                if (!formId || !/^\d+$/.test(formId)) {
+                    console.error('[mktoform] data-kf-mktoform missing or not an integer.');
+                    return;
+                }
+
+                // Hardcoded Marketo details
+                const munchkin = '251-OLR-958';
+                const instance = '//discover.kornferry.com';
+
+                // Ensure a target <form> exists so Mkto renders where we want.
+                const targetFormId = 'mktoForm_' + formId;
+                let existing = container.querySelector('#' + CSS.escape(targetFormId));
+                if (!existing) {
+                    const f = document.createElement('form');
+                    f.id = targetFormId;
+                    container.appendChild(f);
+                }
+
+                // --- tiny dom helpers ---
+                function hide(el) {
+                    if (!el) return;
+                    el.setAttribute('hidden', '');
+                    el.style.display = 'none';
+                    el.classList.add('hidden');
+                }
+
+                function show(el) {
+                    if (!el) return;
+                    el.removeAttribute('hidden');
+                    el.style.removeProperty('display');
+                    el.classList.remove('hidden');
+                }
+
+                function findVideoTarget() {
+                    const sel = container.getAttribute('data-video-target');
+                    const el = sel ? document.querySelector(sel) : container.querySelector('[data-kf-video]');
+                    return el || null;
+                }
+
+                function enableAutoplayParams(url) {
+                    try {
+                        const u = new URL(url, window.location.origin);
+                        const host = u.hostname.toLowerCase();
+                        if (host.includes('youtube.com') || host.includes('youtu.be')) {
+                            if (!u.searchParams.has('autoplay')) u.searchParams.set('autoplay', '1');
+                            if (!u.searchParams.has('mute')) u.searchParams.set('mute', '1');
+                            if (!u.searchParams.has('playsinline')) u.searchParams.set('playsinline', '1');
+                        } else if (host.includes('vimeo.com')) {
+                            if (!u.searchParams.has('autoplay')) u.searchParams.set('autoplay', '1');
+                            if (!u.searchParams.has('muted')) u.searchParams.set('muted', '1');
+                            if (!u.searchParams.has('playsinline')) u.searchParams.set('playsinline', '1');
+                        }
+                        return u.toString();
+                    } catch (e) {
+                        return url;
+                    }
+                }
+
+                function showVideoAndHideForm() {
+                    const formEl = container.querySelector('#' + CSS.escape(targetFormId));
+                    const videoWrap = findVideoTarget();
+
+                    if (videoWrap) {
+                        // Lazy-load iframe if present
+                        const iframe = videoWrap.querySelector('iframe');
+                        if (iframe) {
+                            const src = iframe.getAttribute('src');
+                            const dataSrc = iframe.getAttribute('data-src');
+                            if (!src && dataSrc) {
+                                const finalSrc = iframe.hasAttribute('data-autoplay') ? enableAutoplayParams(dataSrc) : dataSrc;
+                                iframe.setAttribute('src', finalSrc);
+                            } else if (src && iframe.hasAttribute('data-autoplay')) {
+                                iframe.setAttribute('src', enableAutoplayParams(src));
+                            }
+                        }
+                        show(videoWrap);
+                        container.classList.add('is-submitted');
+                    }
+                    hide(formEl);
+                }
+
+                function loadForm() {
+                    if (!window.MktoForms2) {
+                        console.error('[mktoform] MktoForms2 not found. Ensure Marketo Forms2 is preloaded.');
+                        return;
+                    }
+
+                    try {
+                        window.MktoForms2.loadForm(instance, munchkin, Number(formId), function (form) {
+                            wireHooks(form);
+                        });
+                    } catch (e) {
+                        console.error('[mktoform] loadForm threw', e);
+                    }
+                }
+
+                function wireHooks(form) {
+                    try {
+                        const localVideo = container.querySelector('[data-kf-video]');
+                        if (localVideo) hide(localVideo);
+
+                        form.onValidate(function (isValid) {
+                            console.debug('[mktoform] onValidate valid=%o', isValid);
+                        });
+
+                        form.onSuccess(function (values, followUpUrl) {
+                            console.info('[mktoform] onSuccess (overriding followUpUrl) -> showing video, hiding form.', followUpUrl);
+                            showVideoAndHideForm();
+                            return false; // prevent redirect / default thank-you
+                        });
+
+                        container.__kfMkto = {
+                            form: form,
+                            dump: function () {
+                                console.log('[mktoform] values', form.vals());
+                            },
+                            set: function (obj) {
+                                form.setValues(obj);
+                            },
+                            submit: function () {
+                                form.submit();
+                            },
+                            showVideo: showVideoAndHideForm
+                        };
+
+                        const formElem = form.getFormElem()[0];
+
+                        // remove first <style> tag from form elem if found
+                        const styleTag = formElem.querySelector('style');
+                        if (styleTag) styleTag.remove();
+
+                        // find button[type=submit] and restyle
+                        const submitBtn = formElem.querySelector('button[type="submit"]');
+                        if (submitBtn) {
+                            submitBtn.classList.add('btn');
+                        }
+
+                        console.log('[mktoform] Form wired and ready (#%s).', formId);
+                    } catch (e) {
+                        console.error('[mktoform] wiring hooks failed', e);
+                    }
+                }
+
+                // Marketo script must already be loaded globally
+                loadForm();
+            }
+        });
+    })();
+
+</script>

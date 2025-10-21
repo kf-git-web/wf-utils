@@ -1,0 +1,225 @@
+.kf-mktoform {
+    .mktoForm {
+        font-family: var(--korn-ferry-mast-library---fonts--primary-font), Gotham, Arial, sans-serif !important;
+        /* Undo inline styles */
+        width: 100% !important;
+        font-size: unset !important;
+        /* base font color */
+        color: unset !important;
+        /*color: var(--korn-ferry-mast-library---typography-colors--text-base, var(--typography-colors--text-base, unset)) !important;*/
+    }
+
+    .mktoAsterix, .mktoGutter, .mktoOffset, .mktoClear {
+        display: none !important;
+    }
+
+    .mktoPlaceholder {
+        float: unset !important;
+    }
+
+    .mktoPlaceholder:empty {
+        display: none !important;
+    }
+
+    .mktoFieldWrap {
+        width: 100% !important;
+    }
+
+    .mktoFormRow {
+        display: flex;
+        gap: 2rem;
+
+        .mktoFormCol {
+            width: 100%;
+            flex: 1 1 50%;
+        }
+    }
+
+    @media screen and (max-width: 767px) {
+        .mktoFormRow {
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
+
+    input, select, textarea {
+        font-family: var(--korn-ferry-mast-library_components---input--font, var(--_components---input--font));
+        appearance: none;
+        border-top: none !important;
+        border-left: none !important;
+        border-right: none !important;
+        border-style: none none solid;
+        border-color: var(--korn-ferry-mast-library_color-primary---neutral--neutral-500, var(--_color-primary---neutral--neutral-500, grey)) var(--korn-ferry-mast-library_color-primary---neutral--neutral-500, var(--_color-primary---neutral--neutral-500, grey)) var(--korn-ferry-mast-library_color-emerald---emerald--emerald-950, var(--_color-emerald---emerald--emerald-950, #05c690)) !important;
+        border-radius: var(--korn-ferry-mast-library_components---input--border-radius, var(--_components---input--border-radius, 0rem)) !important;
+        box-shadow: none !important;
+        background-color: var(--korn-ferry-mast-library---inputs--forms--field-background, var(--inputs--forms--field-background, #e5e7eb)) !important;
+        color: var(--korn-ferry-mast-library---typography-colors--text-base, var(--typography-colors--text-base, #053328)) !important;
+        font-size: var(--korn-ferry-mast-library_components---input--font-size, var(--_components---input--font-size, 1.125rem)) !important;
+        line-height: var(--korn-ferry-mast-library_components---input--line-height, var(--_components---input--line-height, 1.5em)) !important;
+        font-weight: var(--korn-ferry-mast-library_components---input--font-weight, var(--_components---input--font-weight, 400)) !important;
+        letter-spacing: var(--korn-ferry-mast-library_components---input--letter-spacing, var(--_components---input--letter-spacing, 0em)) !important;
+        padding: var(--korn-ferry-mast-library_components---button--vertical-padding, var(--_components---button--vertical-padding, 1rem)) var(--korn-ferry-mast-library_components---button--horizontal-padding, var(--_components---button--horizontal-padding, 1rem)) !important;
+        height: auto !important;
+        width: 100% !important;
+        margin-bottom: var(--korn-ferry-mast-library_components---input--bottom-margin, var(--_components---input--bottom-margin, 1rem)) !important;
+        display: block !important;
+    }
+
+    select {
+        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path fill="%2300634F" d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/></svg>');
+        background-position: 98%;
+        background-repeat: no-repeat;
+        background-size: 16px;
+        padding-left: .8rem;
+    }
+
+    input:focus, select:focus, textarea:focus {
+        border-bottom: 1px dashed var(--korn-ferry-mast-library---inputs--forms--form-focus-border, var(--korn-ferry-mast-library_color-emerald---emerald--emerald-950, var(--_color-emerald---emerald--emerald-950))) !important;
+    }
+
+    input::placeholder, select::placeholder, textarea::placeholder {
+        color: var(--korn-ferry-mast-library---inputs--forms--input-label) !important;
+    }
+
+    /*TODO: ADD select checked style */
+    /* TODO: Remove invalid border style*/
+
+    input[type="checkbox"] {
+        padding: unset !important;
+    }
+
+    label#LblmarketingCommsOptinDataTransfer:before {
+        content: unset
+    }
+
+    input#marketingCommsOptinDataTransfer {
+        width: auto
+    }
+
+    .mktoFormRow .mktoFormCol {
+        margin-bottom: 1rem !important;
+        float: unset !important;
+        min-height: unset !important;
+    }
+
+    /* Generic label styles */
+
+    .mktoForm .mktoFieldWrap label {
+        font-family: var(--korn-ferry-mast-library---fonts--primary-font), Gotham, Arial, sans-serif !important;
+        width: 100% !important;
+    }
+
+    /* Style labels that are not next to checkboxes which are often unique disclaimers */
+
+    .mktoForm .mktoFieldWrap:not(:has(label ~ .mktoCheckboxList)) label {
+        color: var(--inputs--forms--input-label, var(--korn-ferry-mast-library---inputs--forms--input-label, var(--korn-ferry-mast-library_components---input-label--color, #8c8c8c)));
+        font-size: var(--_components---input-label--font-size, var(--korn-ferry-mast-library_components---input-label--font-size, 14px));
+        line-height: var(--_components---input-label--line-height, var(--korn-ferry-mast-library_components---input-label--line-height, 1em));
+        font-weight: var(--_components---input-label--font-weight, var(--korn-ferry-mast-library_components---input-label--font-weight, 500));
+        letter-spacing: var(--_components---input-label--letter-spacing, var(--korn-ferry-mast-library_components---input-label--letter-spacing, 0em));
+        text-transform: uppercase;
+        margin-bottom: 5px;
+        padding-top: .75rem;
+        padding-bottom: .25rem;
+        position: relative;
+        width: auto !important;
+    }
+
+    .mktoFormRow .mktoFieldWrap a {
+        color: var(--korn-ferry-mast-library---typography-colors--text-base, var(--typography-colors--text-base)) !important;
+        text-decoration: underline !important;
+    }
+
+    .mktoFieldWrap .mktoErrorArrowWrap {
+        /* Hides tooltop arrow display, seems like used to avoid poor alignment*/
+        display: none;
+    }
+
+    .mktoFormRow .mktoFieldWrap #LblMarketing_Comms_Opt_in_Source__c {
+        font-size: 14px;
+    }
+
+    /* must be applied to all disclaimer text fields */
+    .mktoFormRow .mktoFieldWrap #LblMarketing_Comms_Opt_in_Source__c span {
+        font-size: 14px !important;
+        text-transform: none !important;
+        color: var(--korn-ferry-mast-library---typography-colors--text-base, var(--typography-colors--text-base)) !important;
+        font-style: normal;
+        font-weight: 400 !important;
+        line-height: 150%;
+        font-family: var(--korn-ferry-mast-library---fonts--primary-font, var(--fonts--primary-font)), Gotham, Arial, sans-serif !important;
+    }
+
+    .mktoFieldWrap:has(> #LblMarketing_Comms_Opt_in_Source__c) {
+        display: flex;
+        gap: 1rem;
+
+        #LblMarketing_Comms_Opt_in_Source__c {
+            order: 999;
+        }
+
+        .mktoCheckboxList {
+            order: 1;
+            width: auto !important;
+            padding: 0 !important;
+            float: unset !important;
+        }
+    }
+
+    .mktoButtonRow {
+        text-align: left;
+
+        .mktoInset, .mktoButtonWrap {
+            margin-left: unset !important;
+
+            .mktoButton {
+                /*color: white;*/
+                /*border-radius: 3px;*/
+                /*background: var(--korn-ferry-mast-library_color-primary---forest--forest-950, #00634F) !important;*/
+                /*font-weight: 700;*/
+                /*padding: 1.25rem !important;*/
+                /*font-size: 1.375rem !important;*/
+                /*background-image: unset !important;*/
+                /*box-shadow: unset !important;*/
+                /*border: none !important;*/
+            }
+        }
+    }
+}
+
+/* Dark Mode Overrides */
+.korn-ferry-mast-library--u-mode-invert .kf-mktoform, .u-mode-invert .kf-mktoform, .u-mode-invert.kf-mktoform, .korn-ferry-mast-library--u-mode-invert.kf-mktoform {
+    select {
+        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path fill="%23fff" d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/></svg>');
+        background-position: 98%;
+        background-repeat: no-repeat;
+        background-size: 16px;
+        padding-left: .8rem;
+    }
+
+    /*    input, select, textarea {*/
+    /*        border-bottom: 1px solid var(--korn-ferry-mast-library_color-emerald---emerald--emerald-950, var(--_color-emerald---emerald--emerald-950)) !important;*/
+    /*        background-color: rgba(5, 51, 40, 0.80) !important;*/
+    /*        color: white !important;*/
+    /*    }*/
+
+    /*    input:focus, select:focus, textarea:focus {*/
+    /*        border-bottom: 1px solid white !important;*/
+    /*    }*/
+
+    /*    .mktoForm .mktoFormRow .mktoFieldWrap label {*/
+    /*        color: white;*/
+    /*    }*/
+
+    /*    .mktoFormRow .mktoFieldWrap a {*/
+    /*        color: white !important;*/
+    /*    }*/
+
+    /*    .mktoFormRow .mktoFieldWrap #LblMarketing_Comms_Opt_in_Source__c span {*/
+    /*        color: white;*/
+    /*    }*/
+
+    /*    .mktoButtonRow .mktoInset .mktoButton {*/
+    /*        !*color: white;*!*/
+    /*    }*/
+}

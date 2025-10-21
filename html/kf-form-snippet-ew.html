@@ -1,0 +1,392 @@
+<!-- DO NOT UPLOAD TO SNIPPET USE THIS JUST FOR TESTING -->
+<script src="//discover.kornferry.com/js/forms2/js/forms2.min.js"></script>
+<script>
+    const kfMetaCapture={name:"kfMetaCapture",fn:()=>{const t=window,e=document,n={include:["type","categories","topics","consultants","capabilities","industries","region","functions","model","capabilities-interest","lob-interest"],exclude:[],includePrefixes:[],includeAllNamed:!1,includeEmpty:!1,dedupeArrays:!0,trimValues:!0,exposeAs:"kfMeta",dompurifyOptions:{ALLOWED_TAGS:[],ALLOWED_ATTR:[]}},r=/^[A-Za-z0-9_:.-]+$/;function o(){const e=t.kfMetaConfig||{};return Object.assign({},n,e)}function i(r,o){const i=null==r?"":String(r);if(t.DOMPurify&&"function"==typeof t.DOMPurify.sanitize)return t.DOMPurify.sanitize(i,o.dompurifyOptions||n.dompurifyOptions);const a=e.createElement("span");return a.textContent=i,a.textContent||""}function a(t){const n=e.head?e.head.querySelectorAll("meta[name]"):[],o={};return n.forEach(e=>{const n=function(t,e){const n=i(t,e).trim();return r.test(n)?n:""}(e.getAttribute("name"),t);if(!function(t,e){return!!t&&!e.exclude.includes(t)&&(!!e.includeAllNamed||!!e.include.includes(t)||e.includePrefixes.some(e=>t.startsWith(e)))}(n,t))return;let a=e.getAttribute("content");a=i(a,t),t.trimValues&&(a=a.trim()),(t.includeEmpty||""!==a)&&function(t,e,n,r){if(e in t){const o=t[e];Array.isArray(o)?r&&o.includes(n)||o.push(n):t[e]=r&&o===n?[o]:[o,n]}else t[e]=n}(o,n,a,t.dedupeArrays)}),o}return function e(){const n=o();t.DOMPurify||e._warned||(e._warned=!0,console.warn("[kfMetaCapture] DOMPurify not detected; using text-only fallback sanitizer."));const r=a(n);return function(e,n){const r=n.exposeAs||"kfMeta";t[r]=e,t.KF=t.KF||{},t.KF.meta=t.KF.meta||{},t.KF.meta.capture=function(e){const n=Object.assign({},o(),e||{}),r=a(n);return t[n.exposeAs||"kfMeta"]=r,r}}(r,n),r}()}},kfMktoMetaFields={name:"kfMktoMetaFields",fn:()=>{const t=Object.assign({},{mapping:{"capabilities-interest":"capabilitiesInterest","lob-interest":"lOBInterest"},includeEmpty:!1,requireFormSelector:".mktoForm"},window.kfMktoMetaFieldsConfig||{});function e(t){return null==t?"":String(t)}if(window.MktoForms2)return window.kfMeta&&"object"==typeof window.kfMeta||console.warn("[kfMktoMetaFields] window.kfMeta not found; did kfMetaCapture run?"),window.MktoForms2.whenReady(n=>{try{if(!function(){if(!t.requireFormSelector)return!0;try{return null!=document.querySelector(t.requireFormSelector)}catch{return!1}}())return;const r=function(n){const r={};for(const[o,i]of Object.entries(t.mapping)){if(!(o in n))continue;const a=e(n[o]).trim();(t.includeEmpty||""!==a)&&(r[i]=a)}return r}(window.kfMeta||{});if(0===Object.keys(r).length)return;!function(t,e){if(e&&Object.keys(e).length)try{t.addHiddenFields(e)}catch(t){console.warn("[kfMktoMetaFields] addHiddenFields failed:",t)}}(n,r)}catch(t){console.warn("[kfMktoMetaFields] Error during population:",t)}}),!0;console.warn("[kfMktoMetaFields] MktoForms2 not found; skipping.")}};(window.__readyQueue=window.__readyQueue||[]).push({name:"setupUtils",fn:()=>{const t=window.__readyQueue;t.utils=t.utils||{};const e=!!window.DOMPurify;t.utils.sanitize=t=>e?(t=>window.DOMPurify.sanitize(String(t),{ALLOWED_TAGS:[],ALLOWED_ATTR:[],RETURN_TRUSTED_TYPE:!1}).trim())(t):(t=>String(t||"").replace(/[\u0000-\u001F\u007F]/g,"").replace(/<[^>]*>/g,"").trim().slice(0,200))(t),t.utils.paramsFromRaw=e=>{const n=t.utils.sanitize(e),r=new URLSearchParams;return/=/.test(n)&&/[=&]/.test(n)?n.split("&").forEach(e=>{if(!e)return;const[n,o=""]=e.split("="),i=t.utils.sanitize(n),a=t.utils.sanitize(o);/^[a-z0-9_-]{1,40}$/i.test(i)&&r.set(i,a)}):n&&r.set("q",n),r},t.utils.addQueryToDescendantLink=e=>{const{attr:n,param:r,container:o=document,targetSelectorAttr:i="data-kf-target-link",requireSingle:a=!0,allowSelfAnchor:s=!0}=e||{},c=t.utils.sanitize||(t=>String(t||"").trim()),l=t=>{if(!(t instanceof Element))return String(t);const e=t.id?`#${t.id}`:"",n=t.className&&"string"==typeof t.className?"."+t.className.trim().split(/\s+/).slice(0,2).join("."):"";return`${t.tagName.toLowerCase()}${e}${n}`};o.querySelectorAll(`[${n}]`).forEach(t=>{const e=t.getAttribute(n),o=c(e);if(!o)return void console.warn(`[addQueryToDescendantLink] Empty/invalid ${n} on ${l(t)}; skipping.`);const u=t.getAttribute(i);let d=[];if(d=u?Array.from(t.querySelectorAll(u)):s&&t.matches("a")?[t]:Array.from(t.querySelectorAll("a")),!d.length)return void console.warn(`[addQueryToDescendantLink] No target <a> for ${l(t)} (attr ${n}); skipping.`);if(a&&d.length>1)return void console.warn(`[addQueryToDescendantLink] Multiple links for ${l(t)} (attr ${n}); add ${i} to disambiguate. Skipping.`);const f=d[0],m=f.getAttribute("href")||"";let p;try{p=new URL(m,window.location.href)}catch{return void console.warn(`[addQueryToDescendantLink] Invalid href on ${l(f)}: "${m}"; skipping.`)}const y=(t=>{const e=c(t),n=new URLSearchParams;return e?(/=/.test(e)&&/[=&]/.test(e)?e.split("&").forEach(t=>{if(!t)return;const[e,r=""]=t.split("="),o=c(e),i=c(r);/^[a-z0-9_-]{1,40}$/i.test(o)&&n.set(o,i)}):r&&n.set(r,e),n):n})(o);for(const[t,e]of y.entries())p.searchParams.set(t,e);f.setAttribute("href",p.toString())})}}},kfMetaCapture,{name:"updateLinkTargetsForDomains",fn:()=>{const t=window.jQuery;if(!t)return void console.warn("[updateLinkTargetsForDomains] jQuery not found; skipping.");const e={matchDomains:["google.com","*.google.com"],ignoreSelectors:[".w-nav","[data-no-link-scan]",".korn-ferry-mast-library--cc-footer"],skipAttr:"data-skip-link-update"},n=(t=>{const e=t.map(t=>(t||"").trim().toLowerCase()).filter(Boolean).map(t=>t.startsWith("*.")?{type:"wildcard",value:t.slice(2)}:{type:"exact",value:t});return t=>{if(!t)return!1;const n=t.toLowerCase();if(e.some(t=>"exact"===t.type&&t.value===n))return!0;for(const t of e)if("wildcard"===t.type&&n.length>t.value.length&&n.endsWith("."+t.value))return!0;return!1}})(e.matchDomains);t("a[href]").each(function(){const r=this;if("true"===t(r).attr(e.skipAttr))return;if((t=>e.ignoreSelectors.some(e=>t.closest(e).length))(t(r)))return;const o=t(r).attr("href");if(!(t=>{if(!t)return!1;const e=t.trim().toLowerCase();return!(e.startsWith("#")||e.startsWith("javascript:")||e.startsWith("mailto:")||e.startsWith("tel:")||e.startsWith("data:"))})(o))return;let i="";try{i=new URL(o,window.location.href).hostname}catch{return}n(i)&&(t(r).attr("target","_blank"),((e,n)=>{const r=(t(e).attr("rel")||"").split(/\s+/).filter(Boolean),o=new Set(r);n.forEach(t=>o.add(t)),t(e).attr("rel",Array.from(o).join(" "))})(r,["noopener","noreferrer"]))})}},{name:"ensureMailtoOnEmailLinks",fn:()=>{document.querySelectorAll("a[data-kf-email-href]").forEach(t=>{const e=t.getAttribute("href");e&&!e.startsWith("mailto:")&&t.setAttribute("href","mailto:"+e)})}},{name:"wireDialogs",fn:()=>{const t=document.querySelectorAll("dialog");if(!t.length)return;const e=document.querySelectorAll("dialog + button"),n=document.querySelectorAll("dialog button");t.forEach((t,r)=>{const o=e[r],i=n[r];o&&o.addEventListener("click",()=>t.showModal(),{once:!1}),i&&i.addEventListener("click",()=>t.close(),{once:!1}),t.addEventListener("click",e=>{const n=t.getBoundingClientRect();(e.clientX<n.left||e.clientX>n.right||e.clientY<n.top||e.clientY>n.bottom)&&t.close()})})}},{name:"updateFooterYear",fn:()=>{const t=String((new Date).getFullYear());document.querySelectorAll("[data-footer-year]").forEach(e=>{e.textContent=t})}},{name:"updateOfficeCardCityState",fn:()=>{document.querySelectorAll('p[data-city-string="true"]').forEach(t=>{const e=t.querySelector('[data-kf-office="city"]'),n=t.querySelector('[data-kf-office="state"]'),r=t.querySelector('[data-kf-office="optional-comma"]'),o=t.querySelector('[data-kf-office="optional-space"]'),i=t=>t&&""!==t.textContent.trim()&&null!==t.offsetParent,a=i(e),s=i(n);r&&(a&&s?(r.style.display="",o&&(o.style.display="")):(r.style.display="none",o&&(o.style.display="none")))})}},{name:"accordionCloseSiblings",fn:()=>{document.addEventListener("toggle",t=>{const e=t.target;if(!(e instanceof HTMLDetailsElement))return;if(!e.hasAttribute("data-kf-accordion-type"))return;if(!e.open)return;const n=e.getAttribute("data-kf-accordion-type")||"",r=`details[data-kf-accordion-type="${o=n,window.CSS&&CSS.escape?CSS.escape(o):String(o).replace(/"/g,'\\"')}"]`;var o;document.querySelectorAll(r).forEach(t=>{if(t===e||!t.open)return;t.setAttribute("role","unset");const n=t.querySelector("summary");n&&"function"==typeof n.click?n.click():t.open=!1})},!0)}},{name:"applyQueryParamWhitelistedAttrs",fn:()=>{const t=window.__readyQueue||{},e=(t&&t.utils||{}).addQueryToDescendantLink;if("function"!=typeof e)return void console.warn("[applyQueryParamWhitelistedAttrs] Missing utils.addQueryToDescendantLink; did setupUtils run?");[{attr:"data-kf-office-query",param:"office"},{attr:"data-kf-region-query",param:"tab"}].forEach(({attr:t,param:n})=>{e({attr:t,param:n})})}},kfMktoMetaFields),function(t,e){const n="__readyQueue",r=t[n]||[],o=[],i=new Set;let a=!1,s="loading"!==e.readyState;function c(t){return!!t&&"function"==typeof t.then}function l(t){return"function"==typeof t?{fn:t,name:t.name||""}:t&&"function"==typeof t.fn?{fn:t.fn,name:t.name||t.fn.name||""}:(console.error("[readyQueue] Ignored invalid task:",t),null)}function u(t){if(t.name){if(i.has(t.name))return console.warn(`[readyQueue] Skipping duplicate task name "${t.name}".`),!1;i.add(t.name)}else!function(t){t.name||console.warn("[readyQueue] Task has no name; duplicate protection cannot apply. Provide a { name, fn } or a named function.")}(t);return o.push(t),!0}async function d(){if(!a){for(a=!0,console.log("draining tasks");o.length;){const{fn:t,name:e}=o.shift();try{const e=t();c(e)&&await e}catch(t){console.error(e?`[readyQueue] Error in "${e}":`:"[readyQueue] Task error:",t)}}a=!1}}function f(...t){for(const e of t){const t=l(e);t&&u(t)}s&&d()}s||e.addEventListener("DOMContentLoaded",()=>{s=!0,d()},{once:!0});t[n]={push:f,drain:d,has:t=>i.has(t),list:()=>Array.from(i),get length(){return o.length},get isReady(){return s}};for(let t=0;t<r.length;t++)f(r[t]);s&&d()}(window,document);
+</script>
+
+<!--
+<div data-enable-form="" id="mktoform" data-video-target="#gatedVideo" data-kf-mktoform="" class="kf-mktoform"></div>
+-->
+
+<!-- Snippet below in use -->
+
+<style>
+    .kf-mktoform {
+        .mktoForm {
+            font-family: var(--korn-ferry-mast-library---fonts--primary-font), Gotham, Arial, sans-serif !important;
+            /* Undo inline styles */
+            width: 100% !important;
+            color: unset !important;
+            font-size: unset !important;
+        }
+
+        .mktoAsterix, .mktoGutter, .mktoOffset, .mktoClear {
+            display: none !important;
+        }
+
+        .mktoPlaceholder {
+            float: unset !important;
+        }
+
+        .mktoPlaceholder:empty {
+            display: none !important;
+        }
+
+        .mktoFieldWrap {
+            width: 100% !important;
+        }
+
+        .mktoFormRow {
+            display: flex;
+            gap: 2rem;
+
+            .mktoFormCol {
+                width: 100%;
+                flex: 1 1 50%;
+            }
+        }
+
+        @media screen and (max-width: 767px) {
+            .mktoFormRow {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        input, select,textarea {
+            appearance: none;
+            border-top: none !important;
+            border-left: none !important;
+            border-right: none !important;
+            border-bottom: 1px solid var(--korn-ferry-mast-library_color-emerald---emerald--emerald-950, var(--_color-emerald---emerald--emerald-950)) !important;
+            box-shadow: none !important;
+            background-color: #e5e7eb !important;
+            color: var(--korn-ferry-mast-library_color-primary---forest-dark--forest-dark-950, var(--_color-primary---forest-dark--forest-dark-950)); !important;
+            padding: 1rem !important;
+            height: auto !important;
+
+            /* Reset inline styles for inputs */
+            width: 100% !important;
+        }
+
+        input:focus,select:focus,textarea:focus {
+            border-bottom: 1px dashed var(--korn-ferry-mast-library_color-emerald---emerald--emerald-950, var(--_color-emerald---emerald--emerald-950)) !important;
+        }
+
+        input[type="checkbox"] {
+            padding: unset !important;
+        }
+
+        label#LblmarketingCommsOptinDataTransfer:before {
+            content: unset
+        }
+
+        input#marketingCommsOptinDataTransfer {
+            width: auto
+        }
+
+        .mktoFormRow .mktoFormCol {
+            margin-bottom: 1rem !important;
+            float: unset !important;
+            min-height: unset !important;
+        }
+
+        .mktoForm .mktoFormRow .mktoFieldWrap label {
+            color: #00634F;
+            font-weight: 500 !important;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            padding-top: .75rem;
+            padding-bottom: .25rem;
+            position: relative;
+            font-size: 14px;
+            width: auto !important;
+        }
+
+        .mktoFormRow .mktoFieldWrap a {
+            color: var(--korn-ferry-mast-library_color-primary---forest-dark--forest-dark-950, var(--_color-primary---forest-dark--forest-dark-950) !important;
+            text-decoration: underline !important;
+        }
+
+        .mktoFieldWrap .mktoErrorArrowWrap {
+            /* Hides tooltop arrow display, seems like used to avoid poor alignment*/
+            display: none
+        }
+
+        .mktoFormRow .mktoFieldWrap #LblMarketing_Comms_Opt_in_Source__c {
+            font-size: 14px
+        }
+
+        .mktoFormRow .mktoFieldWrap #LblMarketing_Comms_Opt_in_Source__c span {
+            font-size: 14px !important;
+            color: #053328;
+            font-style: normal;
+            font-weight: 325;
+            line-height: 150%;
+            text-transform: none;
+            font-family: var(--korn-ferry-mast-library---fonts--primary-font,var(--fonts--primary-font)), Gotham, Arial, sans-serif !important;
+        }
+
+        .mktoFieldWrap:has(> #LblMarketing_Comms_Opt_in_Source__c) {
+            display: flex;
+            gap: 1rem;
+
+            #LblMarketing_Comms_Opt_in_Source__c {
+                order: 999
+            }
+
+            .mktoCheckboxList {
+                order: 1;
+                width: auto !important;
+                padding: 0 !important;
+                float: unset !important;
+            }
+        }
+
+        .mktoButtonRow {
+            text-align: left;
+            .mktoInset,.mktoButtonWrap {
+                margin-left: unset !important;
+                .mktoButton{
+                    color: white;
+                    border-radius: 3px;
+                    /*background: var(--korn-ferry-mast-library_color-primary---forest--forest-950, #00634F) !important;*/
+                    /*font-weight: 700;*/
+                    /*padding: 1.25rem !important;*/
+                    /*font-size: 1.375rem !important;*/
+                    /*background-image: unset !important;*/
+                    /*box-shadow: unset !important;*/
+                    /*border: none !important;*/
+                }
+            }
+        }
+    }
+
+    /* Dark Mode Overrides */
+    .korn-ferry-mast-library--u-mode-invert .kf-mktoform, .u-mode-invert .kf-mktoform, .u-mode-invert.kf-mktoform, .korn-ferry-mast-library--u-mode-invert.kf-mktoform{
+        input, select,textarea {
+            border-bottom: 1px solid var(--korn-ferry-mast-library_color-emerald---emerald--emerald-950, var(--_color-emerald---emerald--emerald-950)) !important;
+            background-color: rgba(5, 51, 40, 0.80) !important;
+            color: white !important;
+        }
+        input:focus,select:focus,textarea:focus {
+            border-bottom: 1px solid white !important;
+        }
+        .mktoForm .mktoFormRow .mktoFieldWrap label {
+            color: white;
+        }
+
+        .mktoFormRow .mktoFieldWrap a {
+            color: white !important;
+        }
+
+        .mktoFormRow .mktoFieldWrap #LblMarketing_Comms_Opt_in_Source__c span {
+            color: white;
+        }
+
+        .mktoButtonRow .mktoInset .mktoButton {
+            /*color: white;*/
+        }
+     }
+</style>
+<div data-enable-form="{{wf {&quot;path&quot;:&quot;include-marketo-form&quot;,&quot;type&quot;:&quot;Bool&quot;\} }}" id="mktoform" data-video-target="#gatedVideo" data-kf-mktoform="{{wf {&quot;path&quot;:&quot;marketo-form-id&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}" class="kf-mktoform"></div>
+<script>
+    /*
+     * KF ReadyQueue + Events and Webinars Form Loader
+     *
+     * Expects a container like:
+     *   <div id="events-and-webinars-form"
+     *        data-kf-mktoform="1234"
+     *        data-enable-form="true"
+     *        data-video-target="#thankyouVideo">  <!-- optional: CSS selector for a video block to reveal on success -->
+     *   </div>
+     *
+     * Video show/hide behavior
+     * - On successful submit, we HIDE the form and SHOW a target video element.
+     * - Supported targets:
+     *     - If data-video-target is set: we query that selector globally.
+     *     - Else we look for a descendant with [data-kf-video].
+     * - If the target contains an <iframe> with data-src, we lazy-load by moving
+     *   data-src -> src at show-time. If data-autoplay is present on the iframe,
+     *   we append autoplay params for common providers (YouTube/Vimeo) when possible.
+     *
+     * IMPORTANT: This OVERRIDES Marketo's follow-up page behavior.
+     * - We always return false in onSuccess(), canceling followUpUrl redirects.
+     */
+    (function () {
+        const Q = (window.__readyQueue = window.__readyQueue || []);
+
+        Q.push({
+            name: "eventsWebinarsFormLoader",
+            fn: function () {
+                const container = document.getElementById('events-and-webinars-form');
+                if (!container) {
+                    console.warn('[mktoform] #events-and-webinars-form not found. Abort.');
+                    return;
+                }
+
+                // Only run when explicitly enabled
+                const enabled = container.getAttribute('data-enable-form');
+                if (!enabled || enabled.toLowerCase() !== 'true') {
+                    console.debug('[mktoform] data-enable-form is not true; skipping.');
+                    return;
+                }
+
+                if (container.__kfMktoInit) {
+                    console.debug('[mktoform] already initialized; skipping.');
+                    return;
+                }
+                container.__kfMktoInit = true;
+
+                const formIdAttr = container.getAttribute('data-kf-mktoform');
+                const formId = formIdAttr && String(formIdAttr).trim();
+                if (!formId || !/^\d+$/.test(formId)) {
+                    console.error('[mktoform] data-kf-mktoform missing or not an integer.');
+                    return;
+                }
+
+                // Hardcoded Marketo details
+                const munchkin = '251-OLR-958';
+                const instance = '//discover.kornferry.com';
+
+                // Ensure a target <form> exists so Mkto renders where we want.
+                const targetFormId = 'mktoForm_' + formId;
+                let existing = container.querySelector('#' + CSS.escape(targetFormId));
+                if (!existing) {
+                    const f = document.createElement('form');
+                    f.id = targetFormId;
+                    container.appendChild(f);
+                }
+
+                // --- tiny dom helpers ---
+                function hide(el) {
+                    if (!el) return;
+                    el.setAttribute('hidden', '');
+                    el.style.display = 'none';
+                    el.classList.add('hidden');
+                }
+
+                function show(el) {
+                    if (!el) return;
+                    el.removeAttribute('hidden');
+                    el.style.removeProperty('display');
+                    el.classList.remove('hidden');
+                }
+
+                function findVideoTarget() {
+                    const sel = container.getAttribute('data-video-target');
+                    const el = sel ? document.querySelector(sel) : container.querySelector('[data-kf-video]');
+                    return el || null;
+                }
+
+                function enableAutoplayParams(url) {
+                    try {
+                        const u = new URL(url, window.location.origin);
+                        const host = u.hostname.toLowerCase();
+                        if (host.includes('youtube.com') || host.includes('youtu.be')) {
+                            if (!u.searchParams.has('autoplay')) u.searchParams.set('autoplay', '1');
+                            if (!u.searchParams.has('mute')) u.searchParams.set('mute', '1');
+                            if (!u.searchParams.has('playsinline')) u.searchParams.set('playsinline', '1');
+                        } else if (host.includes('vimeo.com')) {
+                            if (!u.searchParams.has('autoplay')) u.searchParams.set('autoplay', '1');
+                            if (!u.searchParams.has('muted')) u.searchParams.set('muted', '1');
+                            if (!u.searchParams.has('playsinline')) u.searchParams.set('playsinline', '1');
+                        }
+                        return u.toString();
+                    } catch (e) {
+                        return url;
+                    }
+                }
+
+                function showVideoAndHideForm() {
+                    const formEl = container.querySelector('#' + CSS.escape(targetFormId));
+                    const videoWrap = findVideoTarget();
+
+                    if (videoWrap) {
+                        // Lazy-load iframe if present
+                        const iframe = videoWrap.querySelector('iframe');
+                        if (iframe) {
+                            const src = iframe.getAttribute('src');
+                            const dataSrc = iframe.getAttribute('data-src');
+                            if (!src && dataSrc) {
+                                const finalSrc = iframe.hasAttribute('data-autoplay') ? enableAutoplayParams(dataSrc) : dataSrc;
+                                iframe.setAttribute('src', finalSrc);
+                            } else if (src && iframe.hasAttribute('data-autoplay')) {
+                                iframe.setAttribute('src', enableAutoplayParams(src));
+                            }
+                        }
+                        show(videoWrap);
+                        container.classList.add('is-submitted');
+                    }
+                    hide(formEl);
+                }
+
+                function loadForm() {
+                    if (!window.MktoForms2) {
+                        console.error('[mktoform] MktoForms2 not found. Ensure Marketo Forms2 is preloaded.');
+                        return;
+                    }
+
+                    try {
+                        window.MktoForms2.loadForm(instance, munchkin, Number(formId), function (form) {
+                            wireHooks(form);
+                        });
+                    } catch (e) {
+                        console.error('[mktoform] loadForm threw', e);
+                    }
+                }
+
+                function wireHooks(form) {
+                    try {
+                        const localVideo = container.querySelector('[data-kf-video]');
+                        if (localVideo) hide(localVideo);
+
+                        form.onValidate(function (isValid) {
+                            console.debug('[mktoform] onValidate valid=%o', isValid);
+                        });
+
+                        form.onSuccess(function (values, followUpUrl) {
+                            console.info('[mktoform] onSuccess (overriding followUpUrl) -> showing video, hiding form.', followUpUrl);
+                            showVideoAndHideForm();
+                            return false; // prevent redirect / default thank-you
+                        });
+
+                        container.__kfMkto = {
+                            form: form,
+                            dump: function () {
+                                console.log('[mktoform] values', form.vals());
+                            },
+                            set: function (obj) {
+                                form.setValues(obj);
+                            },
+                            submit: function () {
+                                form.submit();
+                            },
+                            showVideo: showVideoAndHideForm
+                        };
+
+                        const formElem = form.getFormElem()[0];
+
+                        // remove first <style> tag from form elem if found
+                        const styleTag = formElem.querySelector('style');
+                        if (styleTag) styleTag.remove();
+
+                        // find button[type=submit] and restyle
+                        const submitBtn = formElem.querySelector('button[type="submit"]');
+                        if (submitBtn) {
+                            submitBtn.classList.add('btn');
+                        }
+
+                        console.log('[mktoform] Form wired and ready (#%s).', formId);
+                    } catch (e) {
+                        console.error('[mktoform] wiring hooks failed', e);
+                    }
+                }
+
+                // Marketo script must already be loaded globally
+                loadForm();
+            }
+        });
+    })();
+
+</script>
