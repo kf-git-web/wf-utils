@@ -955,6 +955,7 @@ const kfPluralTextToggle = {
             const ATTR_MAP = [
                 {attr: "data-kf-office-query", param: "office"},
                 {attr: "data-kf-region-query", param: "tab"},
+                {attr: "data-kf-capabilities-query", param: "insights-capabilities"},
                 // add more here as needed
             ];
 
