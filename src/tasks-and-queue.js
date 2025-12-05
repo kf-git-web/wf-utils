@@ -3,6 +3,7 @@ import {ensureMailtoOnEmailLinks} from "./modules/ensureMailtoOnEmailLinks";
 import {updateLinkTargetsForDomains} from "./modules/updateLinkTargetsForDomains";
 import {wireDialogs} from "./modules/wireDialogs";
 import {updateOfficeCardCityState} from "./modules/updateOfficeCardCityState";
+import {accordionCloseSiblings} from "./modules/accordion-close-siblings";
 
 
 /*
@@ -576,35 +577,7 @@ const kfPluralTextToggle = {
     updateOfficeCardCityState,
 
     // Close other accordions of the same data-kf-accordion-type
-    {
-        name: "accordionCloseSiblings",
-        fn: () => {
-            // Only register once per page load (task name dedupe covers us)
-            const esc = (s) => (window.CSS && CSS.escape) ? CSS.escape(s) : String(s).replace(/"/g, '\\"');
-            document.addEventListener('toggle', (e) => {
-                const d = e.target;
-                if (!(d instanceof HTMLDetailsElement)) return;
-                if (!d.hasAttribute('data-kf-accordion-type')) return;
-                if (!d.open) return; // only when it just opened
-
-                const type = d.getAttribute('data-kf-accordion-type') || '';
-                const selector = `details[data-kf-accordion-type="${esc(type)}"]`;
-
-                document.querySelectorAll(selector).forEach(other => {
-                    if (other === d || !other.open) return;
-
-                    other.setAttribute('role', 'unset');
-
-                    const summary = other.querySelector('summary');
-                    if (summary && typeof summary.click === 'function') {
-                        summary.click();
-                    } else {
-                        other.open = false;
-                    }
-                });
-            }, true);
-        }
-    },
+    accordionCloseSiblings,
 
     // Update see all consultants button query
     {
@@ -633,54 +606,105 @@ const kfPluralTextToggle = {
         }
     },
 
+    // regionTabControl is currently INLINE as a pushed task in the page template for Offices page.
+    // It can be rolled back up into the main script bundle as well.
+    // Remember! There is name deduping, so it will need to be removed from one location.
     // {
     //     name: "regionTabControl",
     //     fn: () => {
-    //         // Parse URL params
-    //         function getUrlParameter(name) {
-    //             name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-    //             const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-    //             const results = regex.exec(location.search);
-    //             return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, ' '));
-    //         }
-    //
-    //         // Map string-based tabs to their numeric equivalent
-    //         const tabMap = {
+    //         const TAB_MAP = {
     //             "north-america": 1,
     //             "latin-america": 2,
     //             "asia-pacific": 3,
     //             "emea": 4,
-    //             "europe-middle-east-africa": 4,
+    //             "europe-middle-east-africa": 4
     //         };
     //
-    //         function activateTab(tabIndex) {
-    //             if (tabIndex && tabIndex >= 1 && tabIndex <= 4) {
-    //                 const tabId = "tab-" + tabIndex;
-    //                 // Trigger tab click
-    //                 $('[data-w-tab="' + tabId + '"]').trigger('click');
-    //                 // Sync dropdown
-    //                 $('#kf-geo-tab-switcher').val(tabId);
+    //         function getTabIndexFromParam(raw) {
+    //             if (!raw) return null;
+    //             if (/^\d+$/.test(raw)) {
+    //                 const n = parseInt(raw, 10);
+    //                 return n >= 1 && n <= 4 ? n : null;
     //             }
+    //             const key = raw.toLowerCase().replace(/\s+|_/g, "-");
+    //             return TAB_MAP[key] ?? null;
     //         }
     //
-    //         // --- URL param initialization ---
-    //         const tabParam = getUrlParameter('tab');
-    //         if (tabParam) {
-    //             let tabIndex;
-    //             if (!isNaN(tabParam)) {
-    //                 tabIndex = parseInt(tabParam, 10);
-    //             } else {
-    //                 const key = tabParam.toLowerCase().replace(/\s+/g, '-').replace(/_/g, '-');
-    //                 tabIndex = tabMap[key];
-    //             }
-    //             activateTab(tabIndex);
+    //         // Is this element a clickable tab trigger?
+    //         function isTabTrigger(el) {
+    //             if (!el || !(el instanceof Element)) return false;
+    //             // Anything inside the tab menu is a trigger
+    //             if (el.closest(".w-tabs-menu")) return true;
+    //             // Or elements that have typical trigger semantics:
+    //             return el.matches("a, button, [role='tab'], .w-tab-link");
     //         }
     //
-    //         // --- Dropdown change listener ---
-    //         $('#kf-geo-tab-switcher').on('change', function () {
-    //             const selectedVal = $(this).val(); // e.g. "tab-2"
-    //             $('[data-w-tab="' + selectedVal + '"]').trigger('click');
-    //         });
+    //         // Find the correct trigger; avoid panes in .w-tab-content
+    //         function findTabTrigger(tabId) {
+    //             // Prefer elements inside the menu
+    //             const inMenu = document.querySelector(`.w-tabs-menu [data-w-tab="${tabId}"]`);
+    //             if (inMenu && isTabTrigger(inMenu)) return inMenu;
+    //
+    //             // Fallback: any clickable element with data-w-tab, not inside tab content
+    //             const candidates = Array.from(document.querySelectorAll(`[data-w-tab="${tabId}"]`));
+    //             return candidates.find(el => isTabTrigger(el) && !el.closest(".w-tab-content")) || null;
+    //         }
+    //
+    //         function clickEl(el) {
+    //             if (!el) return;
+    //             if (typeof el.click === "function") el.click();
+    //             else el.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    //         }
+    //
+    //         function activateRegionTab(idx) {
+    //             if (!idx) return;
+    //             const tabId = `tab-${idx}`;
+    //             const trigger = findTabTrigger(tabId);
+    //             if (!trigger) {
+    //                 console.warn(`[regionTabControl] No clickable trigger found for ${tabId}.`);
+    //                 return;
+    //             }
+    //             clickEl(trigger);
+    //
+    //             // Keep dropdown in sync
+    //             const dropDown = document.getElementById("kf-geo-tab-switcher");
+    //             if (dropDown) dropDown.value = tabId;
+    //         }
+    //
+    //         function bindRegionDropdown() {
+    //             const dropDown = document.getElementById("kf-geo-tab-switcher");
+    //             if (!dropDown) return;
+    //
+    //             const HANDLER_KEY = "__regionTabControlHandler";
+    //             if (dropDown[HANDLER_KEY]) dropDown.removeEventListener("change", dropDown[HANDLER_KEY]);
+    //
+    //             const handler = () => {
+    //                 const tabId = dropDown.value; // e.g., "tab-2"
+    //                 const trigger = findTabTrigger(tabId);
+    //                 if (!trigger) {
+    //                     console.warn(`[regionTabControl] Dropdown selected "${tabId}" but no matching trigger.`);
+    //                     return;
+    //                 }
+    //                 clickEl(trigger);
+    //             };
+    //
+    //             dropDown.addEventListener("change", handler);
+    //             dropDown[HANDLER_KEY] = handler;
+    //         }
+    //
+    //         function initializeFromUrl() {
+    //             const param = new URLSearchParams(window.location.search).get("tab");
+    //             const idx = getTabIndexFromParam(param);
+    //             if (idx) activateRegionTab(idx);
+    //         }
+    //
+    //         // If Webflow is present, run after it initializes tabs; else run now.
+    //         const start = () => {
+    //             bindRegionDropdown();
+    //             initializeFromUrl();
+    //         };
+    //         if (window.Webflow && typeof window.Webflow.push === "function") window.Webflow.push(start);
+    //         else start();
     //     }
     // }
 
