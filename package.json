@@ -12,5 +12,6 @@
   "type": "commonjs",
   "devDependencies": {
     "vite": "^7.2.6"
-  }
+  },
+  "private": true
 }
