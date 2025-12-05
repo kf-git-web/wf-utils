@@ -11,7 +11,7 @@
  * @property {function(): void} fn - Initialization function that updates footer year elements.
  */
 
-const updateFooterYear = {
+export const updateFooterYear = {
     name: "updateFooterYear",
     fn: () => {
         const year = String(new Date().getFullYear());

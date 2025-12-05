@@ -8,6 +8,7 @@ import {kfMktoMetaFields} from "./modules/kfMktoMetaFields";
 import {applyQueryParamWhitelistedAttrs} from "./modules/applyQueryParamWhitelistedAttrs";
 import {kfMktoGenericFormLoader} from "./modules/kfMktoGenericFormLoader";
 import {kfPluralTextToggle} from "./modules/kfPluralTextToggle";
+import {updateFooterYear} from "./modules/updateFooterYear";
 
 
 /* Queue all tasks (safe to run before or after the readyQueue loader) */
@@ -348,40 +349,43 @@ import {kfPluralTextToggle} from "./modules/kfPluralTextToggle";
  *   __readyQueue.push({ name: "setupFooter", fn: async () => {...} })
  */
 (function (w, d) {
-    const KEY = "__readyQueue";
-    const early = w[KEY] || [];   // Any early pushed tasks
-    const q = [];                 // Internal queue
-    const registered = new Set(); // For dedupe by name
+    const READY_QUEUE_KEY = "__readyQueue";
+    // Copy any early array to avoid mutating the original host array
+    const early = Array.isArray(w[READY_QUEUE_KEY]) ? w[READY_QUEUE_KEY].slice() : [];
+    const q = [];
+    const registered = new Set();
     let draining = false;
     let ready = d.readyState !== "loading";
 
-    // Utility: check if something is a Promise
-    function isPromise(x) {
-        return !!x && typeof x.then === "function";
+    // Optional debug toggle: set `window.__KF_READY_QUEUE_DEBUG = true` for verbose logs
+    const DEBUG = !!w.__KF_READY_QUEUE_DEBUG;
+    const log = (...a) => DEBUG && console.log("[readyQueue]", ...a);
+    const warn = (...a) => console.warn("[readyQueue]", ...a);
+    const error = (...a) => console.error("[readyQueue]", ...a);
+
+    // Better thenable check (covers Promises and thenables)
+    function isThenable(x) {
+        return x != null && (typeof x === "object" || typeof x === "function") && typeof x.then === "function";
     }
 
-    // Normalize input: function or { fn, name }
+    // Normalize tasks: function or { fn, name }
     function normalize(task) {
-        if (typeof task === "function") {
-            return {fn: task, name: task.name || ""};
-        }
-        if (task && typeof task.fn === "function") {
-            return {fn: task.fn, name: task.name || task.fn.name || ""};
-        }
-        console.error("[readyQueue] Ignored invalid task:", task);
+        if (typeof task === "function") return {fn: task, name: task.name || ""};
+        if (task && typeof task.fn === "function") return {fn: task.fn, name: task.name || task.fn.name || ""};
+        warn("Ignored invalid task:", task);
         return null;
     }
 
     function ensureNameOrWarn(t) {
         if (!t.name) {
-            console.warn("[readyQueue] Task has no name; duplicate protection cannot apply. Provide a { name, fn } or a named function.");
+            warn("Task has no name; duplicate protection cannot apply. Provide a { name, fn } or a named function.");
         }
     }
 
     function register(t) {
         if (t.name) {
             if (registered.has(t.name)) {
-                console.warn(`[readyQueue] Skipping duplicate task name "${t.name}".`);
+                warn(`Skipping duplicate task name "${t.name}".`);
                 return false;
             }
             registered.add(t.name);
@@ -392,35 +396,42 @@ import {kfPluralTextToggle} from "./modules/kfPluralTextToggle";
         return true;
     }
 
+    // Drain returns a promise so callers can await completion
     async function drain() {
         if (draining) return;
         draining = true;
-        console.log('[KFTasks] Running tasks');
+        log("Running tasks");
         while (q.length) {
             const {fn, name} = q.shift();
             try {
                 const out = fn();
-                if (isPromise(out)) await out;
+                if (isThenable(out)) await out;
             } catch (err) {
-                console.error(name ? `[readyQueue] Error in "${name}":` : "[readyQueue] Task error:", err);
+                error(name ? `Error in "${name}":` : "Task error:", err);
             }
         }
         draining = false;
     }
 
+    // Accept individual tasks or arrays; schedule drain on ready
     function push(...tasks) {
-        for (const task of tasks) {
+        // flatten any nested arrays
+        const flat = tasks.flat ? tasks.flat(Infinity) : tasks.reduce((acc, t) => acc.concat(t), []);
+        for (const task of flat) {
             const t = normalize(task);
             if (!t) continue;
             register(t);
         }
-        if (ready) drain();
+        if (ready) {
+            // schedule drain in microtask to avoid blocking the current call stack
+            Promise.resolve().then(() => drain()).catch((err) => error("Drain failed:", err));
+        }
     }
 
     if (!ready) {
         d.addEventListener("DOMContentLoaded", () => {
             ready = true;
-            drain();
+            Promise.resolve().then(() => drain()).catch((err) => error("Drain failed:", err));
         }, {once: true});
     }
 
@@ -442,7 +453,9 @@ import {kfPluralTextToggle} from "./modules/kfPluralTextToggle";
         }
     };
 
-    // Process any early tasks
-    for (let i = 0; i < early.length; i++) push(early[i]);
-    if (ready) drain();
+    w[READY_QUEUE_KEY] = api;
+
+    // Process any early tasks that were pushed to the array before loader executed
+    for (const t of early) push(t);
+    if (ready) Promise.resolve().then(() => drain()).catch((err) => error("Drain failed:", err));
 })(window, document);
