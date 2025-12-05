@@ -1,4 +1,7 @@
-import { kfMetaCapture, ensureMailtoOnEmailLinks, updateLinkTargetsForDomains } from "./modules";
+export { kfMetaCapture } from "./modules/kfMetaCapture";
+export { ensureMailtoOnEmailLinks } from "./modules/ensureMailtoOnEmailLinks";
+export { updateLinkTargetsForDomains } from "./modules/updateLinkTargetsForDomains";
+
 
 /*
  * KF ReadyQueue Module: kfMktoMetaFields

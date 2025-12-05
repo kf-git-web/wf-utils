@@ -1,7 +1,3 @@
-// src/modules/ensureMailtoOnEmailLinks.js
-// Task: ensureMailtoOnEmailLinks
-// Purpose: Ensure anchors with data-kf-email-href have a mailto: href
-
 /**
  * ensureMailtoOnEmailLinks
  *
