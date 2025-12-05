@@ -16,11 +16,6 @@ export default defineConfig({
         },
         sourcemap: true,
         minify: 'esbuild',
-        terserOptions: {
-            compress: true,
-            mangle: true,
-            format: {comments: false}
-        },
         rollupOptions: {
             // mark externals if you don't want them bundled
             external: []
