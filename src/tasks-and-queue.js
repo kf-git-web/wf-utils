@@ -1,6 +1,6 @@
-export { kfMetaCapture } from "./modules/kfMetaCapture";
-export { ensureMailtoOnEmailLinks } from "./modules/ensureMailtoOnEmailLinks";
-export { updateLinkTargetsForDomains } from "./modules/updateLinkTargetsForDomains";
+import { kfMetaCapture } from "./modules/kfMetaCapture";
+import { ensureMailtoOnEmailLinks } from "./modules/ensureMailtoOnEmailLinks";
+import { updateLinkTargetsForDomains } from "./modules/updateLinkTargetsForDomains";
 
 
 /*
@@ -812,7 +812,7 @@ const kfPluralTextToggle = {
     async function drain() {
         if (draining) return;
         draining = true;
-        console.log('draining tasks');
+        console.log('[KFTasks] Running tasks');
         while (q.length) {
             const {fn, name} = q.shift();
             try {
