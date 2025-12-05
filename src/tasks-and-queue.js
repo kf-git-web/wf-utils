@@ -1,5 +1,4 @@
-import { kfMetaCapture } from "./modules/kfMetaCapture"
-import {ensureMailtoOnEmailLinks} from "./modules/ensureMailtoOnEmailLinks";
+import { kfMetaCapture, ensureMailtoOnEmailLinks } from "./modules";
 
 /*
  * KF ReadyQueue Module: kfMktoMetaFields
