@@ -509,7 +509,7 @@ const kfPluralTextToggle = {
 
                     // Choose target link(s)
                     const explicitSel = el.getAttribute(targetSelectorAttr);
-                    let links = [];
+                    let links;
 
                     if (explicitSel) {
                         links = Array.from(el.querySelectorAll(explicitSel));
@@ -913,7 +913,7 @@ const kfPluralTextToggle = {
         for (const task of tasks) {
             const t = normalize(task);
             if (!t) continue;
-            if (!register(t)) continue;
+            register(t);
         }
         if (ready) drain();
     }
@@ -926,7 +926,7 @@ const kfPluralTextToggle = {
     }
 
     // Expose API
-    const api = (w[KEY] = {
+    w[KEY] = {
         push,                 // Add task (fn or { fn, name })
         drain,                // Force run pending tasks
         has(name) {
@@ -941,7 +941,7 @@ const kfPluralTextToggle = {
         get isReady() {
             return ready;
         }
-    });
+    };
 
     // Process any early tasks
     for (let i = 0; i < early.length; i++) push(early[i]);
