@@ -650,6 +650,7 @@ const kfPluralTextToggle = {
         name: "ensureMailtoOnEmailLinks",
         fn: () => {
             document.querySelectorAll('a[data-kf-email-href]').forEach(anchor => {
+                // href will be set to an email, prefix it.
                 const email = anchor.getAttribute('href');
                 if (email && !email.startsWith('mailto:')) {
                     anchor.setAttribute('href', 'mailto:' + email);
