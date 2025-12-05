@@ -4,13 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "minify": "node minify.mjs"
+    "build": "vite build"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "terser": "^5.44.0"
+    "vite": "^7.2.6"
   }
 }
