@@ -1,4 +1,4 @@
-import { kfMetaCapture } from "modules/kfMetaCapture"
+import { kfMetaCapture } from "./modules/kfMetaCapture"
 import {ensureMailtoOnEmailLinks} from "./modules/ensureMailtoOnEmailLinks";
 
 /*
