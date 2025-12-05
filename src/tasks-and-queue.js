@@ -1,4 +1,4 @@
-import { kfMetaCapture, ensureMailtoOnEmailLinks } from "./modules";
+import {kfMetaCapture, ensureMailtoOnEmailLinks} from "./modules";
 
 /*
  * KF ReadyQueue Module: kfMktoMetaFields
@@ -549,7 +549,6 @@ const kfPluralTextToggle = {
                 });
             };
 
-
         }
     },
 
@@ -614,7 +613,8 @@ const kfPluralTextToggle = {
                 const current = ($(el).attr("rel") || "").split(/\s+/).filter(Boolean);
                 const set = new Set(current);
                 tokens.forEach(t => set.add(t));
-                $(el).attr("rel", Array.from(set).join(" "));V
+                $(el).attr("rel", Array.from(set).join(" "));
+                V
             };
 
             const processLinks = () => {
