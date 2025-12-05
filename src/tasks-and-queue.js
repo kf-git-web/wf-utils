@@ -1,6 +1,7 @@
 import { kfMetaCapture } from "./modules/kfMetaCapture";
 import { ensureMailtoOnEmailLinks } from "./modules/ensureMailtoOnEmailLinks";
 import { updateLinkTargetsForDomains } from "./modules/updateLinkTargetsForDomains";
+import {wireDialogs} from "./modules/wireDialogs";
 
 
 /*
@@ -565,36 +566,7 @@ const kfPluralTextToggle = {
     ensureMailtoOnEmailLinks,
 
     // Modal <dialog> wiring
-    {
-        name: "wireDialogs",
-        fn: () => {
-            const dialogs = document.querySelectorAll("dialog");
-            if (!dialogs.length) return;
-
-            const showButtons = document.querySelectorAll("dialog + button");
-            const closeButtons = document.querySelectorAll("dialog button");
-
-            dialogs.forEach((dialog, index) => {
-                const showBtn = showButtons[index];
-                const closeBtn = closeButtons[index];
-
-                if (showBtn) {
-                    showBtn.addEventListener("click", () => dialog.showModal(), {once: false});
-                }
-                if (closeBtn) {
-                    closeBtn.addEventListener("click", () => dialog.close(), {once: false});
-                }
-
-                // Click outside to close
-                dialog.addEventListener("click", (e) => {
-                    const r = dialog.getBoundingClientRect();
-                    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) {
-                        dialog.close();
-                    }
-                });
-            });
-        }
-    },
+    wireDialogs,
 
     // Update footer year
     {
