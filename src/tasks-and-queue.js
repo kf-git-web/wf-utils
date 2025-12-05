@@ -1,7 +1,8 @@
-import { kfMetaCapture } from "./modules/kfMetaCapture";
-import { ensureMailtoOnEmailLinks } from "./modules/ensureMailtoOnEmailLinks";
-import { updateLinkTargetsForDomains } from "./modules/updateLinkTargetsForDomains";
+import {kfMetaCapture} from "./modules/kfMetaCapture";
+import {ensureMailtoOnEmailLinks} from "./modules/ensureMailtoOnEmailLinks";
+import {updateLinkTargetsForDomains} from "./modules/updateLinkTargetsForDomains";
 import {wireDialogs} from "./modules/wireDialogs";
+import {updateOfficeCardCityState} from "./modules/updateOfficeCardCityState";
 
 
 /*
@@ -569,43 +570,10 @@ const kfPluralTextToggle = {
     wireDialogs,
 
     // Update footer year
-    {
-        name: "updateFooterYear",
-        fn: () => {
-            const year = String(new Date().getFullYear());
-            document.querySelectorAll('[data-footer-year]').forEach(el => {
-                el.textContent = year;
-            });
-        }
-    },
+    updateFooterYear,
 
     // Office card city/state comma logic
-    {
-        name: "updateOfficeCardCityState",
-        fn: () => {
-            document.querySelectorAll('p[data-city-string="true"]').forEach(container => {
-                const city = container.querySelector('[data-kf-office="city"]');
-                const state = container.querySelector('[data-kf-office="state"]');
-                const comma = container.querySelector('[data-kf-office="optional-comma"]');
-                const space = container.querySelector('[data-kf-office="optional-space"]');
-
-                const isVisibleAndHasText = el => el && el.textContent.trim() !== '' && el.offsetParent !== null;
-
-                const hasCity = isVisibleAndHasText(city);
-                const hasState = isVisibleAndHasText(state);
-
-                if (comma) {
-                    if (hasCity && hasState) {
-                        comma.style.display = '';
-                        if (space) space.style.display = '';
-                    } else {
-                        comma.style.display = 'none';
-                        if (space) space.style.display = 'none';
-                    }
-                }
-            });
-        }
-    },
+    updateOfficeCardCityState,
 
     // Close other accordions of the same data-kf-accordion-type
     {
