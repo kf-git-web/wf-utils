@@ -5,10 +5,15 @@
 export const observeFsPageCount = {
     name: "observeFsPageCount",
     fn: () => {
-        // Select all pagination counters
-        const targets = document.querySelectorAll('[data-kf-fs-page-count="true"]');
+        // Selector configuration
+        const selectors = {
+            pageCount: '[data-kf-fs-page-count="true"]',
+            maxPageContainer: '[data-kf-fs-max-page-container="true"]',
+            maxPages: '[data-kf-fs-max-pages]'
+        };
 
-        // If zero, nothing to do
+        // Select all pagination counters (entry point). If none, quit silently.
+        const targets = document.querySelectorAll(selectors.pageCount);
         if (targets.length === 0) return;
 
         // If more than one, warn and quit
@@ -16,6 +21,18 @@ export const observeFsPageCount = {
             console.warn(
                 `[observeFsPageCount] Multiple (${targets.length}) pagination counters found. ` +
                 `This task only supports one pagination instance. Aborting.`
+            );
+            return;
+        }
+
+        // At this point we have at least one pageCount element — validate the other selectors exist.
+        const missing = [];
+        if (!document.querySelector(selectors.maxPageContainer)) missing.push('maxPageContainer');
+        if (!document.querySelector(selectors.maxPages)) missing.push('maxPages');
+        if (missing.length) {
+            console.warn(
+                `[observeFsPageCount] Missing required selector(s): ${missing.join(', ')}. ` +
+                `This task requires these selectors to be present when a pageCount exists. Aborting.`
             );
             return;
         }
@@ -30,13 +47,13 @@ export const observeFsPageCount = {
          */
         const updateMaxPageState = () => {
             // 1. Show the sibling max-page container if it exists.
-            const container = target.parentElement?.querySelector('[data-kf-fs-max-page-container="true"]');
+            const container = target.parentElement?.querySelector(selectors.maxPageContainer);
             if (container) {
                 container.style.display = "block";
             }
 
             // 2. Set the max pages value in the associated element.
-            const maxPageEl = target.parentElement?.querySelector('[data-kf-fs-max-pages]');
+            const maxPageEl = target.parentElement?.querySelector(selectors.maxPages);
             if (maxPageEl) {
                 const text = target.textContent || ""; // Get the text content of the target element.
                 const matches = text.match(/\d+/g); // Extract all integers from the text.
