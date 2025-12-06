@@ -46,20 +46,30 @@ export const observeFsPageCount = {
          * 2. Setting the max pages value based on the content of the target element.
          */
         const updateMaxPageState = () => {
+            // Check for the existence of data-kf-count-modified to avoid infinite loops
+            const pageCountEl = target.parentElement?.querySelector(selectors.pageCount);
+            if (pageCountEl) {
+                const spanCheck = pageCountEl.querySelector('span[data-kf-count-modified="true"]');
+                if (spanCheck) {
+                    return; // Already modified, skip to avoid infinite loop
+                }
+            }
+
             // 1. Show the sibling max-page container if it exists.
             const container = target.parentElement?.querySelector(selectors.maxPageContainer);
             if (container) {
-                container.style.display = "block";
+                container.style.display = "flex";
             }
 
-            // 2. Set the max pages value in the associated element.
+            // 2. Set the page values in associated elements.
             const maxPageEl = target.parentElement?.querySelector(selectors.maxPages);
             if (maxPageEl) {
                 const text = target.textContent || ""; // Get the text content of the target element.
                 const matches = text.match(/\d+/g); // Extract all integers from the text.
                 if (matches?.length) {
-                    const lastInt = matches[matches.length - 1]; // Use the last integer as the max page count.
-                    maxPageEl.setAttribute("data-kf-fs-max-pages", lastInt); // Update the attribute.
+                    maxPageEl.innerText = matches[matches.length - 1];
+                    // wrap with a span so that we don't infinitely loop mutations, we check for it
+                    pageCountEl.innerHTML = `<span data-kf-count-modified="true">${matches[0]}</span>`;
                 }
             }
         };
@@ -72,7 +82,8 @@ export const observeFsPageCount = {
         observer.observe(target, {
             characterData: true, // Observe changes to the text content.
             subtree: false,
-            childList: false
+            childList: false,
+            attributes: true,
         });
     }
 };
