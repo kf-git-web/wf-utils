@@ -9,7 +9,7 @@ import {applyQueryParamWhitelistedAttrs} from "./modules/applyQueryParamWhitelis
 import {kfMktoGenericFormLoader} from "./modules/kfMktoGenericFormLoader";
 import {kfPluralTextToggle} from "./modules/kfPluralTextToggle";
 import {updateFooterYear} from "./modules/updateFooterYear";
-
+import {observeFsPageCount} from "./modules/observeFsPageCount";
 
 /* Queue all tasks (safe to run before or after the readyQueue loader) */
 
@@ -44,10 +44,10 @@ import {updateFooterYear} from "./modules/updateFooterYear";
                 }).trim();
 
             const fallbackSanitize = (str) => String(str || "")
-                .replace(/[\u0000-\u001F\u007F]/g, "") // strip control chars
-                .replace(/<[^>]*>/g, "")               // strip HTML tags
+                .replace(/[\u0000-\u001F\u007F]/g, "")
+                .replace(/<[^>]*>/g, "")
                 .trim()
-                .slice(0, 200);                        // cap length defensively
+                .slice(0, 200);
 
             rq.utils.sanitize = (str) => (hasPurify ? purifySanitize(str) : fallbackSanitize(str));
 
@@ -226,107 +226,7 @@ import {updateFooterYear} from "./modules/updateFooterYear";
     // Update see all consultants button query
     applyQueryParamWhitelistedAttrs,
 
-    // regionTabControl is currently INLINE as a pushed task in the page template for Offices page.
-    // It can be rolled back up into the main script bundle as well.
-    // Remember! There is name deduping, so it will need to be removed from one location.
-    // {
-    //     name: "regionTabControl",
-    //     fn: () => {
-    //         const TAB_MAP = {
-    //             "north-america": 1,
-    //             "latin-america": 2,
-    //             "asia-pacific": 3,
-    //             "emea": 4,
-    //             "europe-middle-east-africa": 4
-    //         };
-    //
-    //         function getTabIndexFromParam(raw) {
-    //             if (!raw) return null;
-    //             if (/^\d+$/.test(raw)) {
-    //                 const n = parseInt(raw, 10);
-    //                 return n >= 1 && n <= 4 ? n : null;
-    //             }
-    //             const key = raw.toLowerCase().replace(/\s+|_/g, "-");
-    //             return TAB_MAP[key] ?? null;
-    //         }
-    //
-    //         // Is this element a clickable tab trigger?
-    //         function isTabTrigger(el) {
-    //             if (!el || !(el instanceof Element)) return false;
-    //             // Anything inside the tab menu is a trigger
-    //             if (el.closest(".w-tabs-menu")) return true;
-    //             // Or elements that have typical trigger semantics:
-    //             return el.matches("a, button, [role='tab'], .w-tab-link");
-    //         }
-    //
-    //         // Find the correct trigger; avoid panes in .w-tab-content
-    //         function findTabTrigger(tabId) {
-    //             // Prefer elements inside the menu
-    //             const inMenu = document.querySelector(`.w-tabs-menu [data-w-tab="${tabId}"]`);
-    //             if (inMenu && isTabTrigger(inMenu)) return inMenu;
-    //
-    //             // Fallback: any clickable element with data-w-tab, not inside tab content
-    //             const candidates = Array.from(document.querySelectorAll(`[data-w-tab="${tabId}"]`));
-    //             return candidates.find(el => isTabTrigger(el) && !el.closest(".w-tab-content")) || null;
-    //         }
-    //
-    //         function clickEl(el) {
-    //             if (!el) return;
-    //             if (typeof el.click === "function") el.click();
-    //             else el.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
-    //         }
-    //
-    //         function activateRegionTab(idx) {
-    //             if (!idx) return;
-    //             const tabId = `tab-${idx}`;
-    //             const trigger = findTabTrigger(tabId);
-    //             if (!trigger) {
-    //                 console.warn(`[regionTabControl] No clickable trigger found for ${tabId}.`);
-    //                 return;
-    //             }
-    //             clickEl(trigger);
-    //
-    //             // Keep dropdown in sync
-    //             const dropDown = document.getElementById("kf-geo-tab-switcher");
-    //             if (dropDown) dropDown.value = tabId;
-    //         }
-    //
-    //         function bindRegionDropdown() {
-    //             const dropDown = document.getElementById("kf-geo-tab-switcher");
-    //             if (!dropDown) return;
-    //
-    //             const HANDLER_KEY = "__regionTabControlHandler";
-    //             if (dropDown[HANDLER_KEY]) dropDown.removeEventListener("change", dropDown[HANDLER_KEY]);
-    //
-    //             const handler = () => {
-    //                 const tabId = dropDown.value; // e.g., "tab-2"
-    //                 const trigger = findTabTrigger(tabId);
-    //                 if (!trigger) {
-    //                     console.warn(`[regionTabControl] Dropdown selected "${tabId}" but no matching trigger.`);
-    //                     return;
-    //                 }
-    //                 clickEl(trigger);
-    //             };
-    //
-    //             dropDown.addEventListener("change", handler);
-    //             dropDown[HANDLER_KEY] = handler;
-    //         }
-    //
-    //         function initializeFromUrl() {
-    //             const param = new URLSearchParams(window.location.search).get("tab");
-    //             const idx = getTabIndexFromParam(param);
-    //             if (idx) activateRegionTab(idx);
-    //         }
-    //
-    //         // If Webflow is present, run after it initializes tabs; else run now.
-    //         const start = () => {
-    //             bindRegionDropdown();
-    //             initializeFromUrl();
-    //         };
-    //         if (window.Webflow && typeof window.Webflow.push === "function") window.Webflow.push(start);
-    //         else start();
-    //     }
-    // }
+    observeFsPageCount,
 
     kfMktoMetaFields,
     kfMktoGenericFormLoader,
@@ -336,17 +236,8 @@ import {updateFooterYear} from "./modules/updateFooterYear";
 
 /*=====================================================================*/
 
-
 /**
  * readyQueue: post-DOM-ready task runner with duplicate-name safety
- * - Accepts early pushes to window.__readyQueue (Array) before this loader runs
- * - Wraps each task in try/catch; awaits async tasks
- * - Skips duplicate names with a warning; anonymous tasks still run (warned)
- *
- * Usage:
- *   (window.__readyQueue = window.__readyQueue || []).push({ name: "decorateNav", fn: () => {...} })
- *   (window.__readyQueue = window.__readyQueue || []).push(function highlightCTAs() { ... })
- *   __readyQueue.push({ name: "setupFooter", fn: async () => {...} })
  */
 (function (w, d) {
     const READY_QUEUE_KEY = "__readyQueue";
@@ -396,7 +287,6 @@ import {updateFooterYear} from "./modules/updateFooterYear";
         return true;
     }
 
-    // Drain returns a promise so callers can await completion
     async function drain() {
         if (draining) return;
         draining = true;
@@ -413,9 +303,7 @@ import {updateFooterYear} from "./modules/updateFooterYear";
         draining = false;
     }
 
-    // Accept individual tasks or arrays; schedule drain on ready
     function push(...tasks) {
-        // flatten any nested arrays
         const flat = tasks.flat ? tasks.flat(Infinity) : tasks.reduce((acc, t) => acc.concat(t), []);
         for (const task of flat) {
             const t = normalize(task);
@@ -423,7 +311,6 @@ import {updateFooterYear} from "./modules/updateFooterYear";
             register(t);
         }
         if (ready) {
-            // schedule drain in microtask to avoid blocking the current call stack
             Promise.resolve().then(() => drain()).catch((err) => error("Drain failed:", err));
         }
     }
@@ -435,10 +322,9 @@ import {updateFooterYear} from "./modules/updateFooterYear";
         }, {once: true});
     }
 
-    // Expose API
-    w[KEY] = {
-        push,                 // Add task (fn or { fn, name })
-        drain,                // Force run pending tasks
+    const api = {
+        push,
+        drain,
         has(name) {
             return registered.has(name);
         },
