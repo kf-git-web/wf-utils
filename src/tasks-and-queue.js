@@ -10,6 +10,7 @@ import {kfMktoGenericFormLoader} from "./modules/kfMktoGenericFormLoader";
 import {kfPluralTextToggle} from "./modules/kfPluralTextToggle";
 import {updateFooterYear} from "./modules/updateFooterYear";
 import {observeFsPageCount} from "./modules/observeFsPageCount";
+import {preventHashNavigation} from "./modules/preventHashNavigation";
 
 /* Queue all tasks (safe to run before or after the readyQueue loader) */
 
@@ -230,7 +231,10 @@ import {observeFsPageCount} from "./modules/observeFsPageCount";
 
     kfMktoMetaFields,
     kfMktoGenericFormLoader,
-    kfPluralTextToggle
+    kfPluralTextToggle,
+
+    // Prevent hash URLs while maintaining scroll navigation
+    preventHashNavigation
     /* End Pushing to Queue */
 );
 
