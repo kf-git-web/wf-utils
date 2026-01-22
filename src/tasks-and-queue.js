@@ -11,8 +11,49 @@ import {kfPluralTextToggle} from "./modules/kfPluralTextToggle";
 import {updateFooterYear} from "./modules/updateFooterYear";
 import {observeFsPageCount} from "./modules/observeFsPageCount";
 import {preventHashNavigation} from "./modules/preventHashNavigation";
+import {articleVisibility} from "./modules/articleVisibility";
 
 /* Queue all tasks (safe to run before or after the readyQueue loader) */
+
+// --- Lightweight debug logger (jQuery.migrateWarnings-style) ------------------
+// Goal: a tiny global place to stash messages without lots of plumbing.
+//
+// Usage anywhere:
+//   (window.__readyQueue = window.__readyQueue || []).log("Something happened", {any: "data"})
+//   window.__readyQueue.logs  // inspect
+//
+// Optional: also print to console
+//   window.__KF_READY_QUEUE_LOG_TO_CONSOLE = true
+(function (w) {
+    const key = "__readyQueue";
+    const rq = (w[key] = w[key] || []);
+
+    // In array-mode, attach a tiny logger + store logs on the object.
+    if (Array.isArray(rq)) {
+        rq.logs = Array.isArray(rq.logs) ? rq.logs : [];
+
+        const shouldPrint = () => !!w.__KF_READY_QUEUE_LOG_TO_CONSOLE;
+
+        const pushEntry = (args) => {
+            rq.logs.push({
+                ts: Date.now(),
+                args: Array.from(args)
+            });
+            if (shouldPrint()) {
+                try {
+                    console.log("[readyQueue]", ...args);
+                } catch {
+                    // no-op
+                }
+            }
+        };
+
+        if (typeof rq.log !== "function") rq.log = (...args) => pushEntry(args);
+        if (typeof rq.clearLogs !== "function") rq.clearLogs = () => {
+            rq.logs.length = 0;
+        };
+    }
+})(window);
 
 (window.__readyQueue = window.__readyQueue || []).push(
     // Add utils
@@ -233,6 +274,9 @@ import {preventHashNavigation} from "./modules/preventHashNavigation";
     kfMktoGenericFormLoader,
     kfPluralTextToggle,
 
+    // Article template visibility toggles
+    articleVisibility,
+
     // Prevent hash URLs while maintaining scroll navigation
     preventHashNavigation
     /* End Pushing to Queue */
@@ -245,8 +289,12 @@ import {preventHashNavigation} from "./modules/preventHashNavigation";
  */
 (function (w, d) {
     const READY_QUEUE_KEY = "__readyQueue";
-    // Copy any early array to avoid mutating the original host array
-    const early = Array.isArray(w[READY_QUEUE_KEY]) ? w[READY_QUEUE_KEY].slice() : [];
+
+    // If something logged before init, capture it and migrate into the API.
+    const earlyContainer = w[READY_QUEUE_KEY];
+    const early = Array.isArray(earlyContainer) ? earlyContainer.slice() : [];
+    const earlyLogs = Array.isArray(earlyContainer?.logs) ? earlyContainer.logs.slice() : [];
+
     const q = [];
     const registered = new Set();
     let draining = false;
@@ -254,9 +302,27 @@ import {preventHashNavigation} from "./modules/preventHashNavigation";
 
     // Optional debug toggle: set `window.__KF_READY_QUEUE_DEBUG = true` for verbose logs
     const DEBUG = !!w.__KF_READY_QUEUE_DEBUG;
-    const log = (...a) => DEBUG && console.log("[readyQueue]", ...a);
+    const dbg = (...a) => DEBUG && console.log("[readyQueue]", ...a);
     const warn = (...a) => console.warn("[readyQueue]", ...a);
     const error = (...a) => console.error("[readyQueue]", ...a);
+
+    // --- Lightweight logs store (like jQuery.migrateWarnings) -----------------
+    const logs = [];
+    const shouldPrint = () => !!w.__KF_READY_QUEUE_LOG_TO_CONSOLE;
+
+    function pushLog(args) {
+        logs.push({
+            ts: Date.now(),
+            args: Array.from(args || [])
+        });
+        if (shouldPrint()) {
+            try {
+                console.log("[readyQueue]", ...(args || []));
+            } catch {
+                // no-op
+            }
+        }
+    }
 
     // Better thenable check (covers Promises and thenables)
     function isThenable(x) {
@@ -294,7 +360,7 @@ import {preventHashNavigation} from "./modules/preventHashNavigation";
     async function drain() {
         if (draining) return;
         draining = true;
-        log("Running tasks");
+        dbg("Running tasks");
         while (q.length) {
             const {fn, name} = q.shift();
             try {
@@ -302,6 +368,8 @@ import {preventHashNavigation} from "./modules/preventHashNavigation";
                 if (isThenable(out)) await out;
             } catch (err) {
                 error(name ? `Error in "${name}":` : "Task error:", err);
+                // store as a normal log entry (no levels)
+                pushLog([name ? `Task error: ${name}` : "Task error", err]);
             }
         }
         draining = false;
@@ -326,9 +394,17 @@ import {preventHashNavigation} from "./modules/preventHashNavigation";
         }, {once: true});
     }
 
-    const api = {
+    w[READY_QUEUE_KEY] = {
         push,
         drain,
+
+        // logs (migrateWarnings-style)
+        logs,
+        log: (...args) => pushLog(args),
+        clearLogs: () => {
+            logs.length = 0;
+        },
+
         has(name) {
             return registered.has(name);
         },
@@ -343,7 +419,13 @@ import {preventHashNavigation} from "./modules/preventHashNavigation";
         }
     };
 
-    w[READY_QUEUE_KEY] = api;
+    // Replay early logs
+    if (earlyLogs.length) {
+        for (const e of earlyLogs) {
+            if (!e) continue;
+            pushLog(e.args || []);
+        }
+    }
 
     // Process any early tasks that were pushed to the array before loader executed
     for (const t of early) push(t);
