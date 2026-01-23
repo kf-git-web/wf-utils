@@ -15,6 +15,15 @@ import {articleVisibility} from "./modules/articleVisibility";
 
 /* Queue all tasks (safe to run before or after the readyQueue loader) */
 
+// Shared helper (used by both the pre-init logger shim and the post-init API)
+const readClampedInt = (value, def, min, max) => {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return def;
+    const i = Math.floor(n);
+    if (i < min) return def;
+    return Math.min(i, max);
+};
+
 // --- Lightweight debug logger (migrateWarnings-style, tolerant writes) --------
 // Supports only info + warn.
 //
@@ -37,14 +46,6 @@ import {articleVisibility} from "./modules/articleVisibility";
     // In array-mode, attach a tiny logger + store logs on the object.
     if (Array.isArray(rq)) {
         rq.logs = Array.isArray(rq.logs) ? rq.logs : [];
-
-        const readClampedInt = (value, def, min, max) => {
-            const n = Number(value);
-            if (!Number.isFinite(n)) return def;
-            const i = Math.floor(n);
-            if (i < min) return def;
-            return Math.min(i, max);
-        };
 
         // Safety limits (can be overridden globally, but clamped)
         const MAX_LOGS = readClampedInt(w.__KF_READY_QUEUE_MAX_LOGS, 200, 1, 2000);
@@ -380,14 +381,6 @@ import {articleVisibility} from "./modules/articleVisibility";
     // --- Lightweight logs store (migrateWarnings-style, tolerant writes) ------
     const logs = [];
     const shouldPrint = () => !!w.__KF_READY_QUEUE_LOG_TO_CONSOLE;
-
-    const readClampedInt = (value, def, min, max) => {
-        const n = Number(value);
-        if (!Number.isFinite(n)) return def;
-        const i = Math.floor(n);
-        if (i < min) return def;
-        return Math.min(i, max);
-    };
 
     // Safety limits (can be overridden globally, but clamped)
     const MAX_LOGS = readClampedInt(w.__KF_READY_QUEUE_MAX_LOGS, 200, 1, 2000);
