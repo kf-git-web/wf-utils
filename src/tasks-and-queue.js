@@ -15,13 +15,18 @@ import {articleVisibility} from "./modules/articleVisibility";
 
 /* Queue all tasks (safe to run before or after the readyQueue loader) */
 
-// --- Lightweight debug logger (jQuery.migrateWarnings-style) ------------------
-// Goal: a tiny global place to stash messages without lots of plumbing.
+// --- Lightweight debug logger (migrateWarnings-style, tolerant writes) --------
+// Supports only info + warn.
 //
-// Usage anywhere:
-//   (window.__readyQueue = window.__readyQueue || []).log("Something happened", {any: "data"})
-//   (window.__readyQueue = window.__readyQueue || []).warn("Heads up", {any: "data"})
-//   window.__readyQueue.logs  // inspect
+// Canonical stored shape:
+//   { ts: number, level: "info"|"warn", args: any[] }
+//
+// You can write logs in a few ways:
+//   __readyQueue.info("msg", {data})
+//   __readyQueue.warn("msg", {data})
+//   __readyQueue.log("msg", {data})          // alias of info
+//   __readyQueue.emit("msg", {data})         // tolerant helper
+//   __readyQueue.emit({ level: "warn", args: ["msg", {data}] })
 //
 // Optional: also print to console
 //   window.__KF_READY_QUEUE_LOG_TO_CONSOLE = true
@@ -33,19 +38,54 @@ import {articleVisibility} from "./modules/articleVisibility";
     if (Array.isArray(rq)) {
         rq.logs = Array.isArray(rq.logs) ? rq.logs : [];
 
+        // Safety limits (can be overridden globally)
+        const MAX_LOGS = Number(w.__KF_READY_QUEUE_MAX_LOGS) > 0 ? Number(w.__KF_READY_QUEUE_MAX_LOGS) : 200;
+        const MAX_ARGS = Number(w.__KF_READY_QUEUE_MAX_ARGS) > 0 ? Number(w.__KF_READY_QUEUE_MAX_ARGS) : 6;
+        const MAX_STR = Number(w.__KF_READY_QUEUE_MAX_STR) > 0 ? Number(w.__KF_READY_QUEUE_MAX_STR) : 500;
+
         const shouldPrint = () => !!w.__KF_READY_QUEUE_LOG_TO_CONSOLE;
 
-        const pushEntry = (level, args) => {
+        const clampArgs = (argsLike) => {
+            const arr = Array.isArray(argsLike) ? argsLike : Array.from(argsLike || []);
+            return arr.slice(0, MAX_ARGS).map((x) => (typeof x === "string" ? x.slice(0, MAX_STR) : x));
+        };
+
+        const capLogs = () => {
+            if (rq.logs.length > MAX_LOGS) rq.logs.splice(0, rq.logs.length - MAX_LOGS);
+        };
+
+        // Normalize writes so logs always remain canonical.
+        const normalizeAndPush = (level, input) => {
             const lvl = level === "warn" ? "warn" : "info";
-            rq.logs.push({
-                ts: Date.now(),
-                level: lvl,
-                args: Array.from(args)
-            });
+            const tsNow = Date.now();
+
+            // Object entry form: { level?, ts?, args? }
+            if (input && typeof input === "object" && !Array.isArray(input) && ("args" in input || "message" in input)) {
+                const entry = input;
+                const entryLevel = entry.level === "warn" ? "warn" : lvl;
+                const entryTs = typeof entry.ts === "number" ? entry.ts : tsNow;
+                const entryArgs = "args" in entry
+                    ? clampArgs(Array.isArray(entry.args) ? entry.args : [entry.args])
+                    : clampArgs([entry.message, entry.data].filter((v) => v !== undefined));
+
+                rq.logs.push({ts: entryTs, level: entryLevel, args: entryArgs});
+                capLogs();
+                return {level: entryLevel, args: entryArgs};
+            }
+
+            // Array or args-like
+            const args = clampArgs(input);
+            rq.logs.push({ts: tsNow, level: lvl, args});
+            capLogs();
+            return {level: lvl, args};
+        };
+
+        const pushEntry = (level, args) => {
+            const {level: lvl, args: safeArgs} = normalizeAndPush(level, args);
             if (shouldPrint()) {
                 try {
                     const fn = lvl === "warn" ? console.warn : console.log;
-                    fn.call(console, "[readyQueue]", ...args);
+                    fn.call(console, "[readyQueue]", ...safeArgs);
                 } catch {
                     // no-op
                 }
@@ -57,6 +97,20 @@ import {articleVisibility} from "./modules/articleVisibility";
 
         // Back-compat / convenience: log() == info()
         if (typeof rq.log !== "function") rq.log = (...args) => pushEntry("info", args);
+
+        // Tolerant ingestion API for external scripts.
+        // - emit("msg", {data})
+        // - emit({ level: "warn", ts, args: [...] })
+        if (typeof rq.emit !== "function") {
+            rq.emit = (entryOrMessage, data) => {
+                if (entryOrMessage && typeof entryOrMessage === "object" && !Array.isArray(entryOrMessage)) {
+                    normalizeAndPush(entryOrMessage.level, entryOrMessage);
+                    return;
+                }
+                // message + optional data
+                pushEntry("info", [entryOrMessage, data].filter((v) => v !== undefined));
+            };
+        }
 
         if (typeof rq.clearLogs !== "function") rq.clearLogs = () => {
             rq.logs.length = 0;
@@ -315,21 +369,50 @@ import {articleVisibility} from "./modules/articleVisibility";
     const warn = (...a) => console.warn("[readyQueue]", ...a);
     const error = (...a) => console.error("[readyQueue]", ...a);
 
-    // --- Lightweight logs store (like jQuery.migrateWarnings) -----------------
+    // --- Lightweight logs store (migrateWarnings-style, tolerant writes) ------
     const logs = [];
     const shouldPrint = () => !!w.__KF_READY_QUEUE_LOG_TO_CONSOLE;
 
-    function pushLog(level, args) {
+    // Safety limits (can be overridden globally)
+    const MAX_LOGS = Number(w.__KF_READY_QUEUE_MAX_LOGS) > 0 ? Number(w.__KF_READY_QUEUE_MAX_LOGS) : 200;
+    const MAX_ARGS = Number(w.__KF_READY_QUEUE_MAX_ARGS) > 0 ? Number(w.__KF_READY_QUEUE_MAX_ARGS) : 6;
+    const MAX_STR = Number(w.__KF_READY_QUEUE_MAX_STR) > 0 ? Number(w.__KF_READY_QUEUE_MAX_STR) : 500;
+
+    const clampArgs = (argsLike) => {
+        const arr = Array.isArray(argsLike) ? argsLike : Array.from(argsLike || []);
+        return arr.slice(0, MAX_ARGS).map((x) => (typeof x === "string" ? x.slice(0, MAX_STR) : x));
+    };
+
+    const capLogs = () => {
+        if (logs.length > MAX_LOGS) logs.splice(0, logs.length - MAX_LOGS);
+    };
+
+    function pushLog(level, input) {
         const lvl = level === "warn" ? "warn" : "info";
-        logs.push({
-            ts: Date.now(),
-            level: lvl,
-            args: Array.from(args || [])
-        });
+        const tsNow = Date.now();
+
+        let entryLevel = lvl;
+        let entryTs = tsNow;
+        let entryArgs;
+
+        // Object entry form: { level?, ts?, args? }
+        if (input && typeof input === "object" && !Array.isArray(input) && ("args" in input || "message" in input)) {
+            entryLevel = input.level === "warn" ? "warn" : lvl;
+            entryTs = typeof input.ts === "number" ? input.ts : tsNow;
+            entryArgs = "args" in input
+                ? clampArgs(Array.isArray(input.args) ? input.args : [input.args])
+                : clampArgs([input.message, input.data].filter((v) => v !== undefined));
+        } else {
+            entryArgs = clampArgs(input);
+        }
+
+        logs.push({ts: entryTs, level: entryLevel, args: entryArgs});
+        capLogs();
+
         if (shouldPrint()) {
             try {
-                const fn = lvl === "warn" ? console.warn : console.log;
-                fn.call(console, "[readyQueue]", ...(args || []));
+                const fn = entryLevel === "warn" ? console.warn : console.log;
+                fn.call(console, "[readyQueue]", ...entryArgs);
             } catch {
                 // no-op
             }
@@ -380,7 +463,7 @@ import {articleVisibility} from "./modules/articleVisibility";
                 if (isThenable(out)) await out;
             } catch (err) {
                 error(name ? `Error in "${name}":` : "Task error:", err);
-                // store as a log entry (info by default)
+                // store as an info log entry
                 pushLog("info", [name ? `Task error: ${name}` : "Task error", err]);
             }
         }
@@ -415,6 +498,18 @@ import {articleVisibility} from "./modules/articleVisibility";
         info: (...args) => pushLog("info", args),
         warn: (...args) => pushLog("warn", args),
         log: (...args) => pushLog("info", args),
+
+        // Tolerant ingestion API for external scripts.
+        // - emit("msg", {data})
+        // - emit({ level: "warn", ts, args: [...] })
+        emit: (entryOrMessage, data) => {
+            if (entryOrMessage && typeof entryOrMessage === "object" && !Array.isArray(entryOrMessage)) {
+                pushLog(entryOrMessage.level, entryOrMessage);
+                return;
+            }
+            pushLog("info", [entryOrMessage, data].filter((v) => v !== undefined));
+        },
+
         clearLogs: () => {
             logs.length = 0;
         },
@@ -437,7 +532,7 @@ import {articleVisibility} from "./modules/articleVisibility";
     if (earlyLogs.length) {
         for (const e of earlyLogs) {
             if (!e) continue;
-            pushLog(e.level || "info", e.args || []);
+            pushLog(e.level || "info", e);
         }
     }
 
