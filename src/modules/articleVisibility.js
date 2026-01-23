@@ -26,12 +26,22 @@ export const articleVisibility = {
     fn: () => {
         const root = document.documentElement;
 
-        // Minimal logger: uses __readyQueue.log if available, otherwise no-ops.
+        // Minimal logger: uses __readyQueue.info/log/warn if available, otherwise no-ops.
         const rq = window.__readyQueue;
-        const rqLog = (rq && typeof rq.log === "function") ? rq.log.bind(rq) : null;
-        const log = (event, data) => {
-            if (!rqLog) return;
-            rqLog(this.name + event, data || {});
+        const taskName = articleVisibility.name;
+        const rqInfo = (rq && typeof rq.info === "function") ? rq.info.bind(rq)
+            : (rq && typeof rq.log === "function") ? rq.log.bind(rq)
+                : null;
+        const rqWarn = (rq && typeof rq.warn === "function") ? rq.warn.bind(rq) : null;
+
+        const info = (event, data) => {
+            if (!rqInfo) return;
+            rqInfo(`${taskName}:${event}`, data || {});
+        };
+
+        const warn = (event, data) => {
+            if (rqWarn) rqWarn(`${taskName}:${event}`, data || {});
+            else info(event, data);
         };
 
         const readOverride = (attr) => {
@@ -57,7 +67,7 @@ export const articleVisibility = {
                 return document.querySelector(s);
             } catch (e) {
                 console.warn("[articleVisibility] Invalid selector:", s, e);
-                log("invalidSelector", {selector: s});
+                warn("invalidSelector", {selector: s});
                 return null;
             }
         };
@@ -90,15 +100,42 @@ export const articleVisibility = {
             keyTakeawaysRenderer: q(sel.keyTakeawaysRenderer),
         };
 
-        // 1) Hide authors list if both "no consultant" and "no expert" flags exist.
-        if (els.noConsultantsFlag && els.noExpertsFlag) {
-            const changed = setHidden(els.authorsList, true);
-            if (changed) {
-                log("hide", {
-                    target: "authorsList",
-                    reason: "noConsultantsFlag && noExpertsFlag",
+        // 1) Authors list visibility (Webflow dyn list aware)
+        // Rules:
+        // - Count child .w-dyn-list elements within the authorsList.
+        // - If 0: exit early
+        // - If 1: hide authorsList if EITHER noConsultants OR noExperts flag exists
+        // - If 2+: hide authorsList only if BOTH flags exist
+        if (els.authorsList) {
+            const dynLists = els.authorsList.querySelectorAll(".w-dyn-list");
+            const dynCount = dynLists.length;
+
+            if (dynCount === 0) {
+                info("authors:skip", {
+                    reason: "no .w-dyn-list children",
                     selector: sel.authorsList
                 });
+            } else {
+                const hasNoConsultants = !!els.noConsultantsFlag;
+                const hasNoExperts = !!els.noExpertsFlag;
+
+                const shouldHideAuthors = dynCount === 1
+                    ? (hasNoConsultants || hasNoExperts)
+                    : (hasNoConsultants && hasNoExperts);
+
+                const changed = setHidden(els.authorsList, shouldHideAuthors);
+                if (changed) {
+                    info(shouldHideAuthors ? "hide" : "show", {
+                        target: "authorsList",
+                        reason: dynCount === 1
+                            ? "dynLists=1; hide if noConsultantsFlag || noExpertsFlag"
+                            : "dynLists>=2; hide if noConsultantsFlag && noExpertsFlag",
+                        dynLists: dynCount,
+                        noConsultantsFlag: hasNoConsultants,
+                        noExpertsFlag: hasNoExperts,
+                        selector: sel.authorsList
+                    });
+                }
             }
         }
 
@@ -106,7 +143,7 @@ export const articleVisibility = {
         if (els.noRelatedCapsFlag) {
             const changed = setHidden(els.capsList, true);
             if (changed) {
-                log("hide", {
+                info("hide", {
                     target: "capsList",
                     reason: "noRelatedCapsFlag",
                     selector: sel.capsList
@@ -119,7 +156,7 @@ export const articleVisibility = {
             const hasText = elementHasText(els.keyTakeawaysRenderer);
             const changed = setHidden(els.keyTakeawaysContainer, !hasText);
             if (changed) {
-                log(hasText ? "show" : "hide", {
+                info(hasText ? "show" : "hide", {
                     target: "keyTakeawaysContainer",
                     reason: hasText ? "renderer has text" : "renderer empty",
                     selector: sel.keyTakeawaysContainer

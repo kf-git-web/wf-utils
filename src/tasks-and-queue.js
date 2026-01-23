@@ -20,6 +20,7 @@ import {articleVisibility} from "./modules/articleVisibility";
 //
 // Usage anywhere:
 //   (window.__readyQueue = window.__readyQueue || []).log("Something happened", {any: "data"})
+//   (window.__readyQueue = window.__readyQueue || []).warn("Heads up", {any: "data"})
 //   window.__readyQueue.logs  // inspect
 //
 // Optional: also print to console
@@ -34,21 +35,29 @@ import {articleVisibility} from "./modules/articleVisibility";
 
         const shouldPrint = () => !!w.__KF_READY_QUEUE_LOG_TO_CONSOLE;
 
-        const pushEntry = (args) => {
+        const pushEntry = (level, args) => {
+            const lvl = level === "warn" ? "warn" : "info";
             rq.logs.push({
                 ts: Date.now(),
+                level: lvl,
                 args: Array.from(args)
             });
             if (shouldPrint()) {
                 try {
-                    console.log("[readyQueue]", ...args);
+                    const fn = lvl === "warn" ? console.warn : console.log;
+                    fn.call(console, "[readyQueue]", ...args);
                 } catch {
                     // no-op
                 }
             }
         };
 
-        if (typeof rq.log !== "function") rq.log = (...args) => pushEntry(args);
+        if (typeof rq.info !== "function") rq.info = (...args) => pushEntry("info", args);
+        if (typeof rq.warn !== "function") rq.warn = (...args) => pushEntry("warn", args);
+
+        // Back-compat / convenience: log() == info()
+        if (typeof rq.log !== "function") rq.log = (...args) => pushEntry("info", args);
+
         if (typeof rq.clearLogs !== "function") rq.clearLogs = () => {
             rq.logs.length = 0;
         };
@@ -310,14 +319,17 @@ import {articleVisibility} from "./modules/articleVisibility";
     const logs = [];
     const shouldPrint = () => !!w.__KF_READY_QUEUE_LOG_TO_CONSOLE;
 
-    function pushLog(args) {
+    function pushLog(level, args) {
+        const lvl = level === "warn" ? "warn" : "info";
         logs.push({
             ts: Date.now(),
+            level: lvl,
             args: Array.from(args || [])
         });
         if (shouldPrint()) {
             try {
-                console.log("[readyQueue]", ...(args || []));
+                const fn = lvl === "warn" ? console.warn : console.log;
+                fn.call(console, "[readyQueue]", ...(args || []));
             } catch {
                 // no-op
             }
@@ -368,8 +380,8 @@ import {articleVisibility} from "./modules/articleVisibility";
                 if (isThenable(out)) await out;
             } catch (err) {
                 error(name ? `Error in "${name}":` : "Task error:", err);
-                // store as a normal log entry (no levels)
-                pushLog([name ? `Task error: ${name}` : "Task error", err]);
+                // store as a log entry (info by default)
+                pushLog("info", [name ? `Task error: ${name}` : "Task error", err]);
             }
         }
         draining = false;
@@ -400,7 +412,9 @@ import {articleVisibility} from "./modules/articleVisibility";
 
         // logs (migrateWarnings-style)
         logs,
-        log: (...args) => pushLog(args),
+        info: (...args) => pushLog("info", args),
+        warn: (...args) => pushLog("warn", args),
+        log: (...args) => pushLog("info", args),
         clearLogs: () => {
             logs.length = 0;
         },
@@ -423,7 +437,7 @@ import {articleVisibility} from "./modules/articleVisibility";
     if (earlyLogs.length) {
         for (const e of earlyLogs) {
             if (!e) continue;
-            pushLog(e.args || []);
+            pushLog(e.level || "info", e.args || []);
         }
     }
 
