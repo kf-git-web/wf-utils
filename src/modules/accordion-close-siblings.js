@@ -1,3 +1,5 @@
+import {cssEscape} from "./domUtils";
+
 /**
  * Module that ensures only one `<details>` element with the same accordion type
  * remains open at a time. When a `<details>` element is opened, its siblings
@@ -20,7 +22,7 @@ export const accordionCloseSiblings = {
     name: "accordionCloseSiblings",
     fn: () => {
         // Only register once per page load (task name dedupe covers us)
-        const esc = (s) => (window.CSS && CSS.escape) ? CSS.escape(s) : String(s).replace(/"/g, '\\"');
+        const esc = cssEscape;
         document.addEventListener('toggle', (e) => {
             const d = e.target;
             if (!(d instanceof HTMLDetailsElement)) return;

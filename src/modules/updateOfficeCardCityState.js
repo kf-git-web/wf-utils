@@ -1,3 +1,5 @@
+import {isVisibleAndHasText} from "./domUtils";
+
 /**
  * Module that updates the visibility of optional punctuation and spacing
  * in office card city and state elements based on their content and visibility.
@@ -24,7 +26,6 @@ export const updateOfficeCardCityState ={
             const comma = container.querySelector('[data-kf-office="optional-comma"]');
             const space = container.querySelector('[data-kf-office="optional-space"]');
 
-            const isVisibleAndHasText = el => el && el.textContent.trim() !== '' && el.offsetParent !== null;
 
             const hasCity = isVisibleAndHasText(city);
             const hasState = isVisibleAndHasText(state);

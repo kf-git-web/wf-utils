@@ -25,10 +25,14 @@ export const observeFsPageCount = {
             return;
         }
 
+        // Exactly one target
+        const target = targets[0];
+        const root = target.parentElement || document;
+
         // At this point we have at least one pageCount element — validate the other selectors exist.
         const missing = [];
-        if (!document.querySelector(selectors.maxPageContainer)) missing.push('maxPageContainer');
-        if (!document.querySelector(selectors.maxPages)) missing.push('maxPages');
+        if (!root.querySelector(selectors.maxPageContainer)) missing.push('maxPageContainer');
+        if (!root.querySelector(selectors.maxPages)) missing.push('maxPages');
         if (missing.length) {
             console.warn(
                 `[observeFsPageCount] Missing required selector(s): ${missing.join(', ')}. ` +
@@ -37,9 +41,6 @@ export const observeFsPageCount = {
             return;
         }
 
-        // Exactly one target
-        const target = targets[0];
-
         /**
          * Updates the max page state by:
          * 1. Displaying the sibling max-page container.
@@ -47,7 +48,7 @@ export const observeFsPageCount = {
          */
         const updateMaxPageState = () => {
             // Check for the existence of data-kf-count-modified to avoid infinite loops
-            const pageCountEl = target.parentElement?.querySelector(selectors.pageCount);
+            const pageCountEl = root.querySelector(selectors.pageCount);
             if (pageCountEl) {
                 const spanCheck = pageCountEl.querySelector('span[data-kf-count-modified="true"]');
                 if (spanCheck) {
@@ -56,14 +57,14 @@ export const observeFsPageCount = {
             }
 
             // 1. Show the sibling max-page container if it exists.
-            const container = target.parentElement?.querySelector(selectors.maxPageContainer);
+            const container = root.querySelector(selectors.maxPageContainer);
             if (container) {
                 container.style.display = "flex";
             }
 
             // 2. Set the page values in associated elements.
-            const maxPageEl = target.parentElement?.querySelector(selectors.maxPages);
-            if (maxPageEl) {
+            const maxPageEl = root.querySelector(selectors.maxPages);
+            if (maxPageEl && pageCountEl) {
                 const text = target.textContent || ""; // Get the text content of the target element.
                 const matches = text.match(/\d+/g); // Extract all integers from the text.
                 if (matches?.length) {
