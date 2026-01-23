@@ -198,43 +198,6 @@ const createReadyQueueLogHelpers = (w) => {
             rq.utils.sanitize = (str) => (hasPurify ? purifySanitize(str) : fallbackSanitize(str));
 
             /**
-             * @function paramsFromRaw
-             * @description
-             * Parses a raw query-like string (e.g. from a data-* attribute) into a URLSearchParams object.
-             * Automatically determines if it looks like key/value pairs (contains "=" or "&").
-             * Sanitizes both keys and values via sanitize().
-             * Falls back to treating the string as a "q" parameter if no pairs are detected.
-             *
-             * Example inputs:
-             *   "office=Boston&role=Partner" → URLSearchParams("office=Boston&role=Partner")
-             *   "executive search" → URLSearchParams("q=executive search")
-             *
-             * @param {string} raw - Raw data string (possibly unsafe or unstructured).
-             * @returns {URLSearchParams} Parsed and sanitized parameters.
-             */
-            rq.utils.paramsFromRaw = (raw) => {
-                const clean = rq.utils.sanitize(raw);
-                const params = new URLSearchParams();
-
-                // Detect "key=value" style pairs
-                const looksLikePairs = /=/.test(clean) && /[=&]/.test(clean);
-                if (looksLikePairs) {
-                    clean.split("&").forEach(pair => {
-                        if (!pair) return;
-                        const [kRaw, vRaw = ""] = pair.split("=");
-                        const k = rq.utils.sanitize(kRaw);
-                        const v = rq.utils.sanitize(vRaw);
-                        // allow only safe alphanumeric/underscore/dash keys
-                        if (/^[a-z0-9_-]{1,40}$/i.test(k)) params.set(k, v);
-                    });
-                } else if (clean) {
-                    params.set("q", clean);
-                }
-
-                return params;
-            };
-
-            /**
              * @function addQueryToDescendantLink
              * @description
              * For each element with a given data-* attribute, find exactly one target <a>
@@ -279,7 +242,8 @@ const createReadyQueueLogHelpers = (w) => {
                     if (!cleaned) return params;
 
                     // If it looks like key=value pairs, parse them; else use the provided param key
-                    const looksLikePairs = /=/.test(cleaned) && /[=&]/.test(cleaned);
+                    // NOTE: allow single pairs like "office=Boston".
+                    const looksLikePairs = /=/.test(cleaned);
                     if (looksLikePairs) {
                         cleaned.split("&").forEach(pair => {
                             if (!pair) return;
