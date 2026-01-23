@@ -24,6 +24,70 @@ const readClampedInt = (value, def, min, max) => {
     return Math.min(i, max);
 };
 
+// Shared logger helpers (keeps the log-entry shape consistent and avoids duplicated code)
+const createReadyQueueLogHelpers = (w) => {
+    // Safety limits (can be overridden globally, but clamped)
+    const MAX_LOGS = readClampedInt(w.__KF_READY_QUEUE_MAX_LOGS, 200, 1, 2000);
+    const MAX_ARGS = readClampedInt(w.__KF_READY_QUEUE_MAX_ARGS, 6, 1, 25);
+    const MAX_STR = readClampedInt(w.__KF_READY_QUEUE_MAX_STR, 500, 1, 5000);
+
+    const clampArgs = (argsLike) => {
+        const arr = Array.isArray(argsLike) ? argsLike : Array.from(argsLike || []);
+        return arr.slice(0, MAX_ARGS).map((x) => (typeof x === "string" ? x.slice(0, MAX_STR) : x));
+    };
+
+    const capLogs = (logs) => {
+        if (logs.length > MAX_LOGS) logs.splice(0, logs.length - MAX_LOGS);
+    };
+
+    const shouldPrint = () => !!w.__KF_READY_QUEUE_LOG_TO_CONSOLE;
+
+    const pushTo = (logs, level, input) => {
+        const lvl = level === "warn" ? "warn" : "info";
+        const tsNow = Date.now();
+
+        let entryLevel = lvl;
+        let entryTs = tsNow;
+        let entryArgs;
+
+        // Object entry form: { level?, ts?, args? } or { message, data }
+        if (input && typeof input === "object" && !Array.isArray(input) && ("args" in input || "message" in input)) {
+            entryLevel = input.level === "warn" ? "warn" : lvl;
+            entryTs = typeof input.ts === "number" ? input.ts : tsNow;
+            entryArgs = "args" in input
+                ? clampArgs(Array.isArray(input.args) ? input.args : [input.args])
+                : clampArgs([input.message, input.data].filter((v) => v !== undefined));
+        } else {
+            entryArgs = clampArgs(input);
+        }
+
+        logs.push({ts: entryTs, level: entryLevel, args: entryArgs});
+        capLogs(logs);
+
+        if (shouldPrint()) {
+            try {
+                const fn = entryLevel === "warn" ? console.warn : console.log;
+                fn.call(console, "[readyQueue]", ...entryArgs);
+            } catch {
+                // no-op
+            }
+        }
+    };
+
+    return {
+        clampArgs,
+        capLogs,
+        shouldPrint,
+        pushTo,
+        normalizeLogEntry: (level, input) => {
+            // normalize into canonical entry + return it; useful for the pre-init shim
+            const tmp = [];
+            pushTo(tmp, level, input);
+            return tmp[0];
+        }
+    };
+};
+
 // --- Lightweight debug logger (migrateWarnings-style, tolerant writes) --------
 // Supports only info + warn.
 //
@@ -47,51 +111,19 @@ const readClampedInt = (value, def, min, max) => {
     if (Array.isArray(rq)) {
         rq.logs = Array.isArray(rq.logs) ? rq.logs : [];
 
-        // Safety limits (can be overridden globally, but clamped)
-        const MAX_LOGS = readClampedInt(w.__KF_READY_QUEUE_MAX_LOGS, 200, 1, 2000);
-        const MAX_ARGS = readClampedInt(w.__KF_READY_QUEUE_MAX_ARGS, 6, 1, 25);
-        const MAX_STR = readClampedInt(w.__KF_READY_QUEUE_MAX_STR, 500, 1, 5000);
-
-        const shouldPrint = () => !!w.__KF_READY_QUEUE_LOG_TO_CONSOLE;
-
-        const clampArgs = (argsLike) => {
-            const arr = Array.isArray(argsLike) ? argsLike : Array.from(argsLike || []);
-            return arr.slice(0, MAX_ARGS).map((x) => (typeof x === "string" ? x.slice(0, MAX_STR) : x));
-        };
-
-        const capLogs = () => {
-            if (rq.logs.length > MAX_LOGS) rq.logs.splice(0, rq.logs.length - MAX_LOGS);
-        };
+        const helpers = createReadyQueueLogHelpers(w);
 
         // Normalize writes so logs always remain canonical.
         const normalizeAndPush = (level, input) => {
-            const lvl = level === "warn" ? "warn" : "info";
-            const tsNow = Date.now();
-
-            // Object entry form: { level?, ts?, args? }
-            if (input && typeof input === "object" && !Array.isArray(input) && ("args" in input || "message" in input)) {
-                const entry = input;
-                const entryLevel = entry.level === "warn" ? "warn" : lvl;
-                const entryTs = typeof entry.ts === "number" ? entry.ts : tsNow;
-                const entryArgs = "args" in entry
-                    ? clampArgs(Array.isArray(entry.args) ? entry.args : [entry.args])
-                    : clampArgs([entry.message, entry.data].filter((v) => v !== undefined));
-
-                rq.logs.push({ts: entryTs, level: entryLevel, args: entryArgs});
-                capLogs();
-                return {level: entryLevel, args: entryArgs};
-            }
-
-            // Array or args-like
-            const args = clampArgs(input);
-            rq.logs.push({ts: tsNow, level: lvl, args});
-            capLogs();
-            return {level: lvl, args};
+            const entry = helpers.normalizeLogEntry(level, input);
+            rq.logs.push(entry);
+            helpers.capLogs(rq.logs);
+            return {level: entry.level, args: entry.args};
         };
 
         const pushEntry = (level, args) => {
             const {level: lvl, args: safeArgs} = normalizeAndPush(level, args);
-            if (shouldPrint()) {
+            if (helpers.shouldPrint()) {
                 try {
                     const fn = lvl === "warn" ? console.warn : console.log;
                     fn.call(console, "[readyQueue]", ...safeArgs);
@@ -380,52 +412,10 @@ const readClampedInt = (value, def, min, max) => {
 
     // --- Lightweight logs store (migrateWarnings-style, tolerant writes) ------
     const logs = [];
-    const shouldPrint = () => !!w.__KF_READY_QUEUE_LOG_TO_CONSOLE;
-
-    // Safety limits (can be overridden globally, but clamped)
-    const MAX_LOGS = readClampedInt(w.__KF_READY_QUEUE_MAX_LOGS, 200, 1, 2000);
-    const MAX_ARGS = readClampedInt(w.__KF_READY_QUEUE_MAX_ARGS, 6, 1, 25);
-    const MAX_STR = readClampedInt(w.__KF_READY_QUEUE_MAX_STR, 500, 1, 5000);
-
-    const clampArgs = (argsLike) => {
-        const arr = Array.isArray(argsLike) ? argsLike : Array.from(argsLike || []);
-        return arr.slice(0, MAX_ARGS).map((x) => (typeof x === "string" ? x.slice(0, MAX_STR) : x));
-    };
-
-    const capLogs = () => {
-        if (logs.length > MAX_LOGS) logs.splice(0, logs.length - MAX_LOGS);
-    };
+    const helpers = createReadyQueueLogHelpers(w);
 
     function pushLog(level, input) {
-        const lvl = level === "warn" ? "warn" : "info";
-        const tsNow = Date.now();
-
-        let entryLevel = lvl;
-        let entryTs = tsNow;
-        let entryArgs;
-
-        // Object entry form: { level?, ts?, args? }
-        if (input && typeof input === "object" && !Array.isArray(input) && ("args" in input || "message" in input)) {
-            entryLevel = input.level === "warn" ? "warn" : lvl;
-            entryTs = typeof input.ts === "number" ? input.ts : tsNow;
-            entryArgs = "args" in input
-                ? clampArgs(Array.isArray(input.args) ? input.args : [input.args])
-                : clampArgs([input.message, input.data].filter((v) => v !== undefined));
-        } else {
-            entryArgs = clampArgs(input);
-        }
-
-        logs.push({ts: entryTs, level: entryLevel, args: entryArgs});
-        capLogs();
-
-        if (shouldPrint()) {
-            try {
-                const fn = entryLevel === "warn" ? console.warn : console.log;
-                fn.call(console, "[readyQueue]", ...entryArgs);
-            } catch {
-                // no-op
-            }
-        }
+        helpers.pushTo(logs, level, input);
     }
 
     // Better thenable check (covers Promises and thenables)
