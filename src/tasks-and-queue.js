@@ -38,10 +38,18 @@ import {articleVisibility} from "./modules/articleVisibility";
     if (Array.isArray(rq)) {
         rq.logs = Array.isArray(rq.logs) ? rq.logs : [];
 
-        // Safety limits (can be overridden globally)
-        const MAX_LOGS = Number(w.__KF_READY_QUEUE_MAX_LOGS) > 0 ? Number(w.__KF_READY_QUEUE_MAX_LOGS) : 200;
-        const MAX_ARGS = Number(w.__KF_READY_QUEUE_MAX_ARGS) > 0 ? Number(w.__KF_READY_QUEUE_MAX_ARGS) : 6;
-        const MAX_STR = Number(w.__KF_READY_QUEUE_MAX_STR) > 0 ? Number(w.__KF_READY_QUEUE_MAX_STR) : 500;
+        const readClampedInt = (value, def, min, max) => {
+            const n = Number(value);
+            if (!Number.isFinite(n)) return def;
+            const i = Math.floor(n);
+            if (i < min) return def;
+            return Math.min(i, max);
+        };
+
+        // Safety limits (can be overridden globally, but clamped)
+        const MAX_LOGS = readClampedInt(w.__KF_READY_QUEUE_MAX_LOGS, 200, 1, 2000);
+        const MAX_ARGS = readClampedInt(w.__KF_READY_QUEUE_MAX_ARGS, 6, 1, 25);
+        const MAX_STR = readClampedInt(w.__KF_READY_QUEUE_MAX_STR, 500, 1, 5000);
 
         const shouldPrint = () => !!w.__KF_READY_QUEUE_LOG_TO_CONSOLE;
 
@@ -373,10 +381,18 @@ import {articleVisibility} from "./modules/articleVisibility";
     const logs = [];
     const shouldPrint = () => !!w.__KF_READY_QUEUE_LOG_TO_CONSOLE;
 
-    // Safety limits (can be overridden globally)
-    const MAX_LOGS = Number(w.__KF_READY_QUEUE_MAX_LOGS) > 0 ? Number(w.__KF_READY_QUEUE_MAX_LOGS) : 200;
-    const MAX_ARGS = Number(w.__KF_READY_QUEUE_MAX_ARGS) > 0 ? Number(w.__KF_READY_QUEUE_MAX_ARGS) : 6;
-    const MAX_STR = Number(w.__KF_READY_QUEUE_MAX_STR) > 0 ? Number(w.__KF_READY_QUEUE_MAX_STR) : 500;
+    const readClampedInt = (value, def, min, max) => {
+        const n = Number(value);
+        if (!Number.isFinite(n)) return def;
+        const i = Math.floor(n);
+        if (i < min) return def;
+        return Math.min(i, max);
+    };
+
+    // Safety limits (can be overridden globally, but clamped)
+    const MAX_LOGS = readClampedInt(w.__KF_READY_QUEUE_MAX_LOGS, 200, 1, 2000);
+    const MAX_ARGS = readClampedInt(w.__KF_READY_QUEUE_MAX_ARGS, 6, 1, 25);
+    const MAX_STR = readClampedInt(w.__KF_READY_QUEUE_MAX_STR, 500, 1, 5000);
 
     const clampArgs = (argsLike) => {
         const arr = Array.isArray(argsLike) ? argsLike : Array.from(argsLike || []);
