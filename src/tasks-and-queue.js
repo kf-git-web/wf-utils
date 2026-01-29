@@ -389,8 +389,13 @@ const createReadyQueueLogHelpers = (w) => {
 
     // Normalize tasks: function or { fn, name }
     function normalize(task) {
-        if (typeof task === "function") return {fn: task, name: task.name || ""};
-        if (task && typeof task.fn === "function") return {fn: task.fn, name: task.name || task.fn.name || ""};
+        if (typeof task === "function") return {fn: task, name: task.name || "", priority: typeof task.priority === 'number' && Number.isFinite(task.priority) ? Math.floor(task.priority) : undefined};
+        if (task && typeof task.fn === "function") {
+            // Accept an optional `priority` field on task objects. Higher numeric priority runs sooner.
+            const rawPriority = task.priority;
+            const priority = (typeof rawPriority === 'number' && Number.isFinite(rawPriority)) ? Math.floor(rawPriority) : undefined;
+            return {fn: task.fn, name: task.name || task.fn.name || "", priority};
+        }
         warn("Ignored invalid task:", task);
         return null;
     }
@@ -411,7 +416,26 @@ const createReadyQueueLogHelpers = (w) => {
         } else {
             ensureNameOrWarn(t);
         }
-        q.push(t);
+
+        // If a numeric priority is supplied, insert the task before lower-priority tasks.
+        // Higher numbers mean higher priority (run earlier). Tasks without a priority are treated
+        // as priority 0 and run after positive-priority tasks.
+        const incomingPriority = (typeof t.priority === 'number' && Number.isFinite(t.priority)) ? Math.floor(t.priority) : 0;
+        if (incomingPriority !== 0) {
+            let inserted = false;
+            for (let i = 0; i < q.length; i++) {
+                const existing = q[i];
+                const existingPriority = (typeof existing.priority === 'number' && Number.isFinite(existing.priority)) ? Math.floor(existing.priority) : 0;
+                if (existingPriority < incomingPriority) {
+                    q.splice(i, 0, t);
+                    inserted = true;
+                    break;
+                }
+            }
+            if (!inserted) q.push(t);
+        } else {
+            q.push(t);
+        }
         return true;
     }
 
