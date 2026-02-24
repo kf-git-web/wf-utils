@@ -1,0 +1,113 @@
+<!-- ================ Main Site Scripts ================ -->
+<!-- CLUDO META TAG POPULATE -->
+<script defer>
+(() => {
+  const DELIMITER = "|";
+  const OVERWRITE_EXISTING = false;
+
+  const normalize = s => (s || "").replace(/\s+/g, " ").trim();
+
+  const setMeta = (name, value) => {
+    if (!name || !value) return;
+    const head = document.head;
+    let meta = head.querySelector(`meta[name="${CSS.escape(name)}"]`);
+    if (meta) {
+      const existing = meta.getAttribute("content") || "";
+      if (!OVERWRITE_EXISTING && existing.trim() !== "") {
+        console.log(`[MetaTags] Skipping ${name} (already has content: "${existing}")`);
+        return;
+      }
+    } else {
+      meta = document.createElement("meta");
+      meta.setAttribute("name", name);
+      head.appendChild(meta);
+      console.log(`[MetaTags] Created new <meta name="${name}">`);
+    }
+    meta.setAttribute("content", value);
+    console.log(`[MetaTags] Updated <meta name="${name}"> → "${value}"`);
+  };
+
+  const run = () => {
+    const root = document.getElementById("meta-tags");
+    if (!root) {
+      console.log("[MetaTags] #meta-tags not found. Script exiting.");
+      return;
+    }
+
+    console.log("[MetaTags] Found #meta-tags, scanning…");
+
+    const sections = root.querySelectorAll(':scope div[id^="meta-"]');
+
+    sections.forEach(section => {
+      const sectionId = section.id || "(no id)";
+      if (section.querySelector(".w-dyn-empty")) {
+        console.log(`[MetaTags] Skipping ${sectionId} (empty dataset)`);
+        return;
+      }
+
+      const values = Array.from(section.querySelectorAll(".w-embed"))
+        .map(el => normalize(el.textContent))
+        .filter(Boolean);
+
+      if (!values.length) {
+        console.log(`[MetaTags] No .w-embed values found for ${sectionId}`);
+        return;
+      }
+
+      const content = Array.from(new Set(values)).join(DELIMITER);
+      const name = normalize(section.getAttribute("data-meta-name") || section.id.replace(/^meta-/, ""));
+      if (!name) {
+        console.log(`[MetaTags] Could not determine meta name for ${sectionId}`);
+        return;
+      }
+
+      console.log(`[MetaTags] ${sectionId} → ${name} = "${content}"`);
+      setMeta(name, content);
+    });
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", run);
+  } else {
+    run();
+  }
+})();
+</script>
+<!-- END CLUDO -->
+
+<!-- Finsweet Attributes -->
+<script async type="module"
+src="https://cdn.jsdelivr.net/npm/@finsweet/attributes@2/attributes.js"
+fs-list
+></script>
+<script>
+  document.documentElement.setAttribute('fs-list-debug','');
+</script>
+
+<!-- CLUDO -->
+<script>
+    window.cludoConfig = {
+        /** Required properties **/
+        customerId: 10000903,
+        engineId: 10003006,
+        language: "en", //Change this to reflect the language of the search
+        searchUrl: "/search-results", //Search URL - change this to reflect the actual search URL
+        searchInputSelectors: ["#cludo-search-input"], //Array of CSS selectors for input fields that should trigger search
+    };
+</script>
+<script src="https://customer.cludo.com/scripts/bundles/search-script.min.js" type="text/javascript"></script>
+<script src="https://customer.cludo.com/templates/rich-inline/v1.0/dist/js/cludo-search-results.js" type="text/javascript" onload=""></script>
+
+<!-- ================ End Main Site Scripts ================ -->
+
+<!-- ================ Component and Task Queue Scripts ================ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.7/purify.min.js" integrity="sha512-78KH17QLT5e55GJqP76vutp1D2iAoy06WcYBXB6iBCsmO6wWzx0Qdg8EDpm8mKXv68BcvHOyeeP4wxAL0twJGQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<!-- [Component] Accordion from Mast 2.3 -->
+<script src="https://cdn.jsdelivr.net/gh/nocodesupplyco/mast@latest/accordion.min.js"></script>
+
+<!-- Task Queue -->
+<script>
+(function(){"use strict";const v={name:"kfMetaCapture",fn:()=>{const e=window,i=document,m={include:["type","categories","topics","consultants","capabilities","industries","region","functions","model","capabilities-interest","lob-interest"],exclude:[],includePrefixes:[],includeAllNamed:!1,includeEmpty:!1,dedupeArrays:!0,trimValues:!0,exposeAs:"kfMeta",dompurifyOptions:{ALLOWED_TAGS:[],ALLOWED_ATTR:[]}},d=/^[A-Za-z0-9_:.-]+$/;function n(){const a=e.kfMetaConfig||{};return Object.assign({},m,a)}function o(a,f){const y=a==null?"":String(a);if(e.DOMPurify&&typeof e.DOMPurify.sanitize=="function")return e.DOMPurify.sanitize(y,f.dompurifyOptions||m.dompurifyOptions);const p=i.createElement("span");return p.textContent=y,p.textContent||""}function c(a,f){const y=o(a,f).trim();return d.test(y)?y:""}function r(a,f){return!a||f.exclude.includes(a)?!1:f.includeAllNamed||f.include.includes(a)?!0:f.includePrefixes.some(y=>a.startsWith(y))}function u(a,f,y,p){if(f in a){const k=a[f];Array.isArray(k)?p&&k.includes(y)||k.push(y):a[f]=p?k===y?[k]:[k,y]:[k,y]}else a[f]=y}function l(a){const f=i.head?i.head.querySelectorAll("meta[name]"):[],y={};return f.forEach(p=>{const k=p.getAttribute("name"),A=c(k,a);if(!r(A,a))return;let b=p.getAttribute("content");b=o(b,a),a.trimValues&&(b=b.trim()),!(!a.includeEmpty&&b==="")&&u(y,A,b,a.dedupeArrays)}),y}function g(a,f){const y=f.exposeAs||"kfMeta";e[y]=a,e.KF=e.KF||{},e.KF.meta=e.KF.meta||{},e.KF.meta.capture=function(p){const k=Object.assign({},n(),p||{}),A=l(k);return e[k.exposeAs||"kfMeta"]=A,A}}function h(){const a=n();!e.DOMPurify&&!h._warned&&(h._warned=!0,console.warn("[kfMetaCapture] DOMPurify not detected; using text-only fallback sanitizer."));const f=l(a);return g(f,a),f}return h()}},C={name:"ensureMailtoOnEmailLinks",fn:()=>{document.querySelectorAll("a[data-kf-email-href]").forEach(e=>{const i=e.getAttribute("href");i&&!i.startsWith("mailto:")&&e.setAttribute("href","mailto:"+i)})}},q={name:"updateLinkTargetsForDomains",fn:()=>{const e=window.jQuery;if(!e){console.warn("[updateLinkTargetsForDomains] jQuery not found; skipping.");return}const i={matchDomains:["google.com","*.google.com"],ignoreSelectors:[".w-nav","[data-no-link-scan]",".korn-ferry-mast-library--cc-footer"],skipAttr:"data-skip-link-update"},s=u=>e(u).attr(i.skipAttr)==="true",m=u=>i.ignoreSelectors.some(l=>u.closest(l).length),d=u=>{if(!u)return!1;const l=u.trim().toLowerCase();return!(l.startsWith("#")||l.startsWith("javascript:")||l.startsWith("mailto:")||l.startsWith("tel:")||l.startsWith("data:"))},o=(u=>{const l=u.map(g=>(g||"").trim().toLowerCase()).filter(Boolean).map(g=>g.startsWith("*.")?{type:"wildcard",value:g.slice(2)}:{type:"exact",value:g});return g=>{if(!g)return!1;const h=g.toLowerCase();if(l.some(a=>a.type==="exact"&&a.value===h))return!0;for(const a of l)if(a.type==="wildcard"&&h.length>a.value.length&&h.endsWith("."+a.value))return!0;return!1}})(i.matchDomains),c=(u,l)=>{const g=(e(u).attr("rel")||"").split(/\s+/).filter(Boolean),h=new Set(g);l.forEach(a=>h.add(a)),e(u).attr("rel",Array.from(h).join(" "))};(()=>{e("a[href]").each(function(){const u=this;if(s(u)||m(e(u)))return;const l=e(u).attr("href");if(!d(l))return;let g="";try{g=new URL(l,window.location.href).hostname}catch{return}o(g)&&(e(u).attr("target","_blank"),c(u,["noopener","noreferrer"]))})})()}},x={name:"wireDialogs",fn:()=>{const e=document.querySelectorAll("dialog");if(!e.length)return;const i=document.querySelectorAll("dialog + button"),s=document.querySelectorAll("dialog button");e.forEach((m,d)=>{const n=i[d],o=s[d];n&&n.addEventListener("click",()=>m.showModal(),{once:!1}),o&&o.addEventListener("click",()=>m.close(),{once:!1}),m.addEventListener("click",c=>{const r=m.getBoundingClientRect();(c.clientX<r.left||c.clientX>r.right||c.clientY<r.top||c.clientY>r.bottom)&&m.close()})})}},R=e=>window.CSS&&typeof window.CSS.escape=="function"?window.CSS.escape(String(e)):String(e).replace(/"/g,'\\"'),P=e=>{if(!e)return!1;const i=e.textContent;return typeof i!="string"||i.trim()===""?!1:e.offsetParent!==null},U={name:"updateOfficeCardCityState",fn:()=>{document.querySelectorAll('p[data-city-string="true"]').forEach(e=>{const i=e.querySelector('[data-kf-office="city"]'),s=e.querySelector('[data-kf-office="state"]'),m=e.querySelector('[data-kf-office="optional-comma"]'),d=e.querySelector('[data-kf-office="optional-space"]'),n=P(i),o=P(s);m&&(n&&o?(m.style.display="",d&&(d.style.display="")):(m.style.display="none",d&&(d.style.display="none")))})}},N={name:"accordionCloseSiblings",fn:()=>{const e=R;document.addEventListener("toggle",i=>{const s=i.target;if(!(s instanceof HTMLDetailsElement)||!s.hasAttribute("data-kf-accordion-type")||!s.open)return;const m=s.getAttribute("data-kf-accordion-type")||"",d=`details[data-kf-accordion-type="${e(m)}"]`;document.querySelectorAll(d).forEach(n=>{if(n===s||!n.open)return;n.setAttribute("role","unset");const o=n.querySelector("summary");o&&typeof o.click=="function"?o.click():n.open=!1})},!0)}},Q={name:"kfMktoMetaFields",fn:()=>{const i=Object.assign({},{mapping:{"capabilities-interest":"capabilitiesInterest","lob-interest":"lOBInterest"},includeEmpty:!1,requireFormSelector:".mktoForm"},window.kfMktoMetaFieldsConfig||{});function s(){if(!i.requireFormSelector)return!0;try{return document.querySelector(i.requireFormSelector)!=null}catch{return!1}}function m(o){return o==null?"":String(o)}function d(o,c){if(c&&Object.keys(c).length)try{o.addHiddenFields(c)}catch(r){console.warn("[kfMktoMetaFields] addHiddenFields failed:",r)}}function n(o){const c={};for(const[r,u]of Object.entries(i.mapping)){if(!(r in o))continue;const l=m(o[r]).trim();!i.includeEmpty&&l===""||(c[u]=l)}return c}if(!window.MktoForms2){console.warn("[kfMktoMetaFields] MktoForms2 not found; skipping.");return}return(!window.kfMeta||typeof window.kfMeta!="object")&&console.warn("[kfMktoMetaFields] window.kfMeta not found; did kfMetaCapture run?"),window.MktoForms2.whenReady(o=>{try{if(!s())return;const c=window.kfMeta||{},r=n(c);if(Object.keys(r).length===0)return;d(o,r)}catch(c){console.warn("[kfMktoMetaFields] Error during population:",c)}}),!0}},$={name:"applyQueryParamWhitelistedAttrs",fn:()=>{const e=window.__readyQueue||{},s=(e&&e.utils||{}).addQueryToDescendantLink;if(typeof s!="function"){console.warn("[applyQueryParamWhitelistedAttrs] Missing utils.addQueryToDescendantLink; did setupUtils run?");return}[{attr:"data-kf-office-query",param:"office"},{attr:"data-kf-region-query",param:"tab"},{attr:"data-kf-capabilities-query",param:"insights-capabilities"}].forEach(({attr:d,param:n})=>{s({attr:d,param:n})})}},O={name:"kfMktoGenericFormLoader",fn:()=>{const e=document.querySelectorAll(".kf-mktoform");if(!e.length){console.debug("[mktoform] No .kf-mktoform containers found; nothing to do.");return}const i="251-OLR-958",s="//discover.kornferry.com",m=n=>typeof n=="string"&&n.toLowerCase()==="true";function d(n){try{const o=new URL(n,window.location.origin);return/^https?:$/.test(o.protocol)?["kornferry.com","www.kornferry.com"].some(r=>o.hostname===r||o.hostname.endsWith("."+r))?!0:(console.warn("[mktoform] Redirect URL not in allowed domain list:",o.hostname),!1):!1}catch{return!1}}e.forEach(n=>{const o=n.getAttribute("data-enable-form");if(!m(o)){console.debug("[mktoform] data-enable-form is not true; skipping this container.",n);return}if(n.__kfMktoInit){console.debug("[mktoform] already initialized; skipping.",n);return}if(n.querySelector("form")){console.warn("[mktoform] Container already has a <form>; not instantiating Mkto form.",n);return}const r=n.getAttribute("data-kf-mktoform"),u=r&&String(r).trim();if(!u||!/^\d+$/.test(u)){console.error("[mktoform] data-kf-mktoform missing or not an integer.",n);return}n.__kfMktoInit=!0;const l="mktoForm_"+u,g=document.createElement("form");g.id=l,g.setAttribute("data-kf-generated","true"),n.appendChild(g);const h=m(n.getAttribute("data-redirect")||"false"),a=(n.getAttribute("data-redirect-url")||"").trim();function f(p){try{p.onValidate(function(L){console.debug("[mktoform] onValidate valid=%o",L)}),p.onSuccess(function(){return h&&a&&d(a)?(console.info("[mktoform] onSuccess -> redirecting to",a),window.location.assign(a),!1):(console.info("[mktoform] onSuccess -> no redirect; allowing default Mkto thank-you."),!0)});const k=p.getFormElem()[0],A=k.querySelector("style");A&&A.remove();const b=k.querySelector('button[type="submit"]')||k.querySelector('input[type="submit"]');b&&b.classList.add("btn"),n.__kfMkto={form:p,dump(){console.log("[mktoform] values",p.vals())},set(L){p.setValues(L)},submit(){p.submit()}},console.log("[mktoform] Form wired and ready (#%s).",u)}catch(k){console.error("[mktoform] wiring hooks failed",k)}}function y(){if(!window.MktoForms2){console.error("[mktoform] MktoForms2 not found. Ensure Marketo Forms2 is preloaded.");return}try{window.MktoForms2.loadForm(s,i,Number(u),function(p){f(p)})}catch(p){console.error("[mktoform] loadForm threw",p)}}y()})}},I={name:"kfPluralTextToggle",fn:()=>{try{const e="data-kf-plural-elements",i="data-kf-plural-group",s="data-kf-single-text",m="data-kf-plural-text",d=(c=[])=>{Array.isArray(c)&&c.forEach(r=>{if(r instanceof HTMLElement)try{r.hidden=!0,r.setAttribute("aria-hidden","true")}catch(u){console.warn("[kfPluralTextToggle] Failed to hide element:",r,u)}})},n=(c=[])=>{Array.isArray(c)&&c.forEach(r=>{if(r instanceof HTMLElement)try{r.hidden=!1,r.removeAttribute("hidden"),r.removeAttribute("aria-hidden")}catch(u){console.warn("[kfPluralTextToggle] Failed to show element:",r,u)}})},o=Array.from(document.querySelectorAll(`[${e}]`)).filter(c=>(c.getAttribute(e)||"").trim()!=="");if(o.length===0)return;o.forEach(c=>{try{const r=c.getAttribute(e)?.trim();if(!r)return;const u=c.parentElement;if(!u){console.warn("[kfPluralTextToggle] Marker has no parent:",c);return}const g=document.querySelectorAll(`[${i}="${r}"]`).length>1,h=Array.from(u.querySelectorAll(`[${s}]`)),a=Array.from(u.querySelectorAll(`[${m}]`));g?(n(a),d(h)):(n(h),d(a))}catch(r){console.error("[kfPluralTextToggle] Error processing marker:",c,r)}})}catch(e){console.error("[kfPluralTextToggle] Script initialization error:",e)}}},z={name:"updateFooterYear",fn:()=>{const e=String(new Date().getFullYear());document.querySelectorAll("[data-footer-year]").forEach(i=>{i.textContent=e})}},H={name:"observeFsPageCount",fn:()=>{const e={pageCount:'[data-kf-fs-page-count="true"]',maxPageContainer:'[data-kf-fs-max-page-container="true"]',maxPages:"[data-kf-fs-max-pages]"},i=document.querySelectorAll(e.pageCount);if(i.length===0)return;if(i.length>1){console.warn(`[observeFsPageCount] Multiple (${i.length}) pagination counters found. This task only supports one pagination instance. Aborting.`);return}const s=i[0],m=s.parentElement||document,d=[];if(m.querySelector(e.maxPageContainer)||d.push("maxPageContainer"),m.querySelector(e.maxPages)||d.push("maxPages"),d.length){console.warn(`[observeFsPageCount] Missing required selector(s): ${d.join(", ")}. This task requires these selectors to be present when a pageCount exists. Aborting.`);return}const n=()=>{const c=m.querySelector(e.pageCount);if(c&&c.querySelector('span[data-kf-count-modified="true"]'))return;const r=m.querySelector(e.maxPageContainer);r&&(r.style.display="flex");const u=m.querySelector(e.maxPages);if(u&&c){const g=(s.textContent||"").match(/\d+/g);g?.length&&(u.innerText=g[g.length-1],c.innerHTML=`<span data-kf-count-modified="true">${g[0]}</span>`)}};n(),new MutationObserver(n).observe(s,{characterData:!0,subtree:!1,childList:!1,attributes:!0})}},W={name:"preventHashNavigation",fn:()=>{document.querySelectorAll('[data-kf-prevent-hash="true"]').forEach(e=>{let i;if(e.tagName==="A"?i=e:i=e.querySelector(":scope > a"),!i||i.dataset.preventHashProcessed==="true")return;const s=i.getAttribute("href");!s||!s.startsWith("#")||(i.dataset.preventHashProcessed="true",i.dataset.preventHashTarget=s,i.removeAttribute("href"),i.style.cursor="pointer",i.addEventListener("click",m=>{m.preventDefault(),m.stopPropagation();const d=i.dataset.preventHashTarget.slice(1),n=document.getElementById(d);n&&(n.scrollIntoView({behavior:"smooth"}),n.focus({preventScroll:!0}))}))})}},M=(e,i,s,m)=>{const d=Number(e);if(!Number.isFinite(d))return i;const n=Math.floor(d);return n<s?i:Math.min(n,m)},D=e=>{const i=M(e.__KF_READY_QUEUE_MAX_LOGS,200,1,2e3),s=M(e.__KF_READY_QUEUE_MAX_ARGS,6,1,25),m=M(e.__KF_READY_QUEUE_MAX_STR,500,1,5e3),d=r=>(Array.isArray(r)?r:Array.from(r||[])).slice(0,s).map(l=>typeof l=="string"?l.slice(0,m):l),n=r=>{r.length>i&&r.splice(0,r.length-i)},o=()=>!!e.__KF_READY_QUEUE_LOG_TO_CONSOLE,c=(r,u,l)=>{const g=u==="warn"?"warn":"info",h=Date.now();let a=g,f=h,y;if(l&&typeof l=="object"&&!Array.isArray(l)&&("args"in l||"message"in l)?(a=l.level==="warn"?"warn":g,f=typeof l.ts=="number"?l.ts:h,y="args"in l?d(Array.isArray(l.args)?l.args:[l.args]):d([l.message,l.data].filter(p=>p!==void 0))):y=d(l),r.push({ts:f,level:a,args:y}),n(r),o())try{(a==="warn"?console.warn:console.log).call(console,"[readyQueue]",...y)}catch{}};return{clampArgs:d,capLogs:n,shouldPrint:o,pushTo:c,normalizeLogEntry:(r,u)=>{const l=[];return c(l,r,u),l[0]}}};(function(e){const i="__readyQueue",s=e[i]=e[i]||[];if(Array.isArray(s)){s.logs=Array.isArray(s.logs)?s.logs:[];const m=D(e),d=(o,c)=>{const r=m.normalizeLogEntry(o,c);return s.logs.push(r),m.capLogs(s.logs),{level:r.level,args:r.args}},n=(o,c)=>{const{level:r,args:u}=d(o,c);if(m.shouldPrint())try{(r==="warn"?console.warn:console.log).call(console,"[readyQueue]",...u)}catch{}};typeof s.info!="function"&&(s.info=(...o)=>n("info",o)),typeof s.warn!="function"&&(s.warn=(...o)=>n("warn",o)),typeof s.log!="function"&&(s.log=(...o)=>n("info",o)),typeof s.emit!="function"&&(s.emit=(o,c)=>{if(o&&typeof o=="object"&&!Array.isArray(o)){d(o.level,o);return}n("info",[o,c].filter(r=>r!==void 0))}),typeof s.clearLogs!="function"&&(s.clearLogs=()=>{s.logs.length=0})}})(window),(window.__readyQueue=window.__readyQueue||[]).push({name:"setupUtils",fn:()=>{const e=window.__readyQueue;e.utils=e.utils||{};const i=!!window.DOMPurify,s=d=>window.DOMPurify.sanitize(String(d),{ALLOWED_TAGS:[],ALLOWED_ATTR:[],RETURN_TRUSTED_TYPE:!1}).trim(),m=d=>String(d||"").replace(/[\u0000-\u001F\u007F]/g,"").replace(/<[^>]*>/g,"").trim().slice(0,200);e.utils.sanitize=d=>i?s(d):m(d),e.utils.addQueryToDescendantLink=d=>{const{attr:n,param:o,container:c=document,targetSelectorAttr:r="data-kf-target-link",requireSingle:u=!0,allowSelfAnchor:l=!0}=d||{},g=e.utils.sanitize||(f=>String(f||"").trim()),h=f=>{if(!(f instanceof Element))return String(f);const y=f.id?`#${f.id}`:"",p=f.className&&typeof f.className=="string"?"."+f.className.trim().split(/\s+/).slice(0,2).join("."):"";return`${f.tagName.toLowerCase()}${y}${p}`},a=f=>{const y=g(f),p=new URLSearchParams;return y&&(/=/.test(y)?y.split("&").forEach(A=>{if(!A)return;const[b,L=""]=A.split("="),S=g(b),_=g(L);/^[a-z0-9_-]{1,40}$/i.test(S)&&p.set(S,_)}):o&&p.set(o,y)),p};c.querySelectorAll(`[${n}]`).forEach(f=>{const y=f.getAttribute(n),p=g(y);if(!p){console.warn(`[addQueryToDescendantLink] Empty/invalid ${n} on ${h(f)}; skipping.`);return}const k=f.getAttribute(r);let A;if(k?A=Array.from(f.querySelectorAll(k)):l&&f.matches("a")?A=[f]:A=Array.from(f.querySelectorAll("a")),!A.length){console.warn(`[addQueryToDescendantLink] No target <a> for ${h(f)} (attr ${n}); skipping.`);return}if(u&&A.length>1){console.warn(`[addQueryToDescendantLink] Multiple links for ${h(f)} (attr ${n}); add ${r} to disambiguate. Skipping.`);return}const b=A[0],L=b.getAttribute("href")||"";let S;try{S=new URL(L,window.location.href)}catch{console.warn(`[addQueryToDescendantLink] Invalid href on ${h(b)}: "${L}"; skipping.`);return}const _=a(p);for(const[t,w]of _.entries())S.searchParams.set(t,w);b.setAttribute("href",S.toString())})}}},v,q,C,x,z,U,N,$,H,Q,O,I,W),(function(e,i){const s="__readyQueue",m=e[s],d=Array.isArray(m)?m.slice():[],n=Array.isArray(m?.logs)?m.logs.slice():[],o=[],c=new Set;let r=!1,u=i.readyState!=="loading";const l=!!e.__KF_READY_QUEUE_DEBUG,g=(...t)=>l&&console.log("[readyQueue]",...t),h=(...t)=>console.warn("[readyQueue]",...t),a=(...t)=>console.error("[readyQueue]",...t),f=[],y=D(e);function p(t,w){y.pushTo(f,t,w)}function k(t){return t!=null&&(typeof t=="object"||typeof t=="function")&&typeof t.then=="function"}function A(t){if(typeof t=="function")return{fn:t,name:t.name||"",priority:typeof t.priority=="number"&&Number.isFinite(t.priority)?Math.floor(t.priority):void 0};if(t&&typeof t.fn=="function"){const w=t.priority,E=typeof w=="number"&&Number.isFinite(w)?Math.floor(w):void 0;return{fn:t.fn,name:t.name||t.fn.name||"",priority:E}}return h("Ignored invalid task:",t),null}function b(t){t.name||h("Task has no name; duplicate protection cannot apply. Provide a { name, fn } or a named function.")}function L(t){if(t.name){if(c.has(t.name))return h(`Skipping duplicate task name "${t.name}".`),!1;c.add(t.name)}else b(t);const w=typeof t.priority=="number"&&Number.isFinite(t.priority)?Math.floor(t.priority):0;if(w!==0){let E=!1;for(let T=0;T<o.length;T++){const F=o[T];if((typeof F.priority=="number"&&Number.isFinite(F.priority)?Math.floor(F.priority):0)<w){o.splice(T,0,t),E=!0;break}}E||o.push(t)}else o.push(t);return!0}async function S(){if(!r){for(r=!0,g("Running tasks");o.length;){const{fn:t,name:w}=o.shift();try{const E=t();k(E)&&await E}catch(E){a(w?`Error in "${w}":`:"Task error:",E),p("info",[w?`Task error: ${w}`:"Task error",E])}}r=!1}}function _(...t){const w=t.flat?t.flat(1/0):t.reduce((E,T)=>E.concat(T),[]);for(const E of w){const T=A(E);T&&L(T)}u&&Promise.resolve().then(()=>S()).catch(E=>a("Drain failed:",E))}if(u||i.addEventListener("DOMContentLoaded",()=>{u=!0,Promise.resolve().then(()=>S()).catch(t=>a("Drain failed:",t))},{once:!0}),e[s]={push:_,drain:S,logs:f,info:(...t)=>p("info",t),warn:(...t)=>p("warn",t),log:(...t)=>p("info",t),emit:(t,w)=>{if(t&&typeof t=="object"&&!Array.isArray(t)){p(t.level,t);return}p("info",[t,w].filter(E=>E!==void 0))},clearLogs:()=>{f.length=0},has(t){return c.has(t)},list(){return Array.from(c)},get length(){return o.length},get isReady(){return u}},n.length)for(const t of n)t&&p(t.level||"info",t);for(const t of d)_(t);u&&Promise.resolve().then(()=>S()).catch(t=>a("Drain failed:",t))})(window,document)})();
+//# sourceMappingURL=bundle.min.js.map
+</script>
