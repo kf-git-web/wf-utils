@@ -36,8 +36,24 @@
 
         const sections = root.querySelectorAll(':scope div[id^="meta-"]');
 
+        const idCounts = {};
+        sections.forEach(s => { idCounts[s.id] = (idCounts[s.id] || 0) + 1; });
+        Object.entries(idCounts).forEach(([id, count]) => {
+            if (count > 1) console.warn(`[MetaTags] Duplicate section ID detected: "${id}" appears ${count} times`);
+        });
+
         sections.forEach(section => {
             const sectionId = section.id || "(no id)";
+
+            // meta-date is a special case for static pages that use the Meta Generator component
+            // use the plain text content of the div directly
+            if (section.id === "meta-date") {
+                const dateContent = normalize(section.textContent);
+                if (dateContent) setMeta("date", dateContent);
+                else console.log(`[MetaTags] #meta-date found but has no content`);
+                return;
+            }
+
             if (section.querySelector(".w-dyn-empty")) {
                 console.log(`[MetaTags] Skipping ${sectionId} (empty dataset)`);
                 return;
