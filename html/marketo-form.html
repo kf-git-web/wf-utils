@@ -39,7 +39,7 @@
     @media screen and (max-width: 767px) {
         .mktoFormRow {
             flex-direction: column;
-            gap: 1rem;
+            gap: 0;
         }
     }
 
@@ -66,8 +66,8 @@
         display: block !important;
     }
 
-    select {
-        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path fill="%2300634F" d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/></svg>');
+    .mktoForm select.mktoField {
+        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%2300634F" d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/></svg>');
         background-position: 98%;
         background-repeat: no-repeat;
         background-size: 16px;
@@ -86,6 +86,7 @@
     /* TODO: Remove invalid border style*/
 
     input[type="checkbox"] {
+        margin-bottom: 0 !important;
         padding: unset !important;
         opacity: 0;
     }
@@ -124,9 +125,20 @@
     }
 
     .mktoFormRow .mktoFormCol {
-        margin-bottom: 1rem !important;
+        margin-bottom: 0 !important;
         float: unset !important;
         min-height: unset !important;
+    }
+
+    .mktoHtmlText.mktoHasWidth,.mktoHtmlText {
+    /* Overrides for arbitrary text */
+        width: auto !important;
+        font-family: var(--korn-ferry-mast-library---fonts--primary-font), Gotham, Arial, sans-serif !important;
+        color: var(--korn-ferry-mast-library---typography-colors--text-base, var(--typography-colors--text-base)) !important;
+        span{
+            font-family: var(--korn-ferry-mast-library---fonts--primary-font), Gotham, Arial, sans-serif !important;
+            color: var(--korn-ferry-mast-library---typography-colors--text-base, var(--typography-colors--text-base)) !important;
+        }
     }
 
     /* Generic label styles */
@@ -146,15 +158,21 @@
         letter-spacing: var(--_components---input-label--letter-spacing, var(--korn-ferry-mast-library_components---input-label--letter-spacing, 0em));
         text-transform: uppercase;
         margin-bottom: 5px;
-        padding-top: .75rem;
-        padding-bottom: .25rem;
+        padding-top: 0;
+        padding-bottom: .125rem;
         position: relative;
         width: auto !important;
     }
 
     .mktoFormRow .mktoFieldWrap a {
         color: var(--korn-ferry-mast-library---typography-colors--text-base, var(--typography-colors--text-base)) !important;
-        text-decoration: underline !important;
+        text-decoration-line: underline !important;
+        text-decoration-style: solid !important;
+        text-decoration-skip-ink: auto !important;
+        text-decoration-color: var(--korn-ferry-mast-library_color-emerald---emerald--emerald-950, var(--_color-emerald---emerald--emerald-950, #05C690)) !important;
+        text-decoration-thickness: 10% !important;
+        text-underline-offset: auto !important;
+        text-underline-position: from-font !important;
     }
 
     .mktoFieldWrap .mktoErrorArrowWrap {
@@ -193,6 +211,19 @@
         }
     }
 
+    /* override for job candidate field(s) */
+    .mktoFieldWrap:has(> #LbljobCandidate) {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+
+        label, .mktoCheckboxList {
+            width: auto !important;
+            flex: 0 0 auto;
+            max-width: 100%;
+        }
+    }
+
     .mktoButtonRow {
         text-align: left;
 
@@ -214,9 +245,100 @@
     }
 }
 
+
+/* force single-column fields at any breakpoint */
+.kf-mktoform.kf-mktoform-1up,
+.kf-mktoform .mktoForm.kf-mktoform-1up,
+.kf-mktoform:has(.kf-mktoform-1up){
+    .mktoFormRow {
+        flex-direction: column;
+        gap: 0;
+    }
+}
+
+
+.kf-mktoform.kf-mktoform-b {
+
+    /* --- Labels: forest green, not uppercase, adjusted typography --- */
+    .mktoForm .mktoFieldWrap:not(:has(label ~ .mktoCheckboxList)) label {
+        color: var(--korn-ferry-mast-library_color-primary---forest--forest-950, var(--_color-primary---forest--forest-950, #00634F));
+        text-transform: none;
+        line-height: 32px;
+        letter-spacing: -0.28px;
+    }
+
+    /* --- Inputs / selects / textarea: full border, white bg, rounded corners --- */
+    input, select, textarea {
+        border-style: solid !important;
+        border-width: 1px !important;
+        border-color: var(--korn-ferry-mast-library_color-primary---utility--light-gray, var(--_color-primary---utility--light-gray, #dad8d6)) !important;
+        background-color: #fff !important;
+        color: var(--korn-ferry-mast-library---typography-colors--text-base, var(--typography-colors--text-base, #053328)) !important;
+    }
+
+    .mktoForm select.mktoField {
+        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%230008" d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/></svg>');
+    }
+
+    input:focus, select:focus, textarea:focus {
+        border-color: var(--korn-ferry-mast-library_color-emerald---emerald--emerald-950, var(--_color-emerald---emerald--emerald-950, #05C690)) !important;
+        border-style: solid !important;
+    }
+
+    /* --- Radio buttons: green styled --- */
+    input[type="radio"] {
+        appearance: auto !important;
+        opacity: 1;
+        width: auto !important;
+        margin-bottom: 0 !important;
+        accent-color: var(--korn-ferry-mast-library_color-primary---forest--forest-950, var(--_color-primary---forest--forest-950, #00634F));
+        border-style: unset !important;
+        background-color: transparent !important;
+        padding: unset !important;
+        display: inline !important;
+    }
+
+    /* --- Checkbox: square, forest green accent --- */
+    input[type="checkbox"] {
+        accent-color: var(--korn-ferry-mast-library_color-primary---forest--forest-950, var(--_color-primary---forest--forest-950, #00634F));
+    }
+
+    /* --- HR divider before the opt-in row --- */
+    .mktoFieldWrap:has(> #LblMarketing_Comms_Opt_in_Source__c) {
+        border-top: 1px solid var(--korn-ferry-mast-library_color-primary---neutral--neutral-200, var(--_color-primary---neutral--neutral-200, #e5e7eb));
+        padding-top: 1.5rem;
+        margin-top: .5rem;
+    }
+
+    /* --- Submit button: full width, solid forest green --- */
+    .mktoButtonRow {
+        text-align: unset;
+        width: 100%;
+        padding-top: 3rem;
+
+        .mktoInset, .mktoButtonWrap {
+            display: block;
+            width: 100%;
+            .mktoButton {
+                width: 100%;
+                background: var(--korn-ferry-mast-library_color-primary---forest--forest-950, var(--_color-primary---forest--forest-950, #00634F)) !important;
+                background-image: none !important;
+                color: #fff !important;
+                font-weight: 700 !important;
+                font-size: 1rem !important;
+                padding: 1.25rem !important;
+                border: none !important;
+                border-radius: 4px !important;
+                box-shadow: none !important;
+                cursor: pointer;
+            }
+        }
+    }
+}
+
 /* Dark Mode Overrides */
 .korn-ferry-mast-library--u-mode-invert .kf-mktoform, .u-mode-invert .kf-mktoform, .u-mode-invert.kf-mktoform, .korn-ferry-mast-library--u-mode-invert.kf-mktoform {
-    select {
+    .mktoForm select.mktoField {
         background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path fill="%23fff" d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/></svg>');
         background-position: 98%;
         background-repeat: no-repeat;
@@ -250,10 +372,4 @@
     /*        !*color: white;*!*/
     /*    }*/
 }
-
-/* Add Style 2 below here: */
 </style>
-
-<!-- Rendered HTML after script generates form: -->
-
-<div data-wf--marketo-form-loader--variant="300px-min-height" class="mktoform-wrapper w-variant-d4600880-0b40-577a-8ef6-e5ec7f99d9aa"><div data-kf-mktoform="1002" data-enable-form="true" class="kf-mktoform kf-mktoform"><form id="mktoForm_1002" data-kf-generated="true" novalidate="novalidate" class="mktoForm mktoHasWidth mktoLayoutLeft" style="font-family: Helvetica, Arial, sans-serif; font-size: 13px; color: rgb(51, 51, 51); width: 853px;"><div class="mktoFormRow"><div class="mktoFieldDescriptor mktoFormCol" style="margin-bottom: 10px;"><div class="mktoOffset" style="width: 10px;"></div><div class="mktoFieldWrap mktoRequiredField"><label for="FirstName" id="LblFirstName" class="mktoLabel mktoHasWidth" style="width: 121px;"><div class="mktoAsterix">*</div>First Name</label><div class="mktoGutter mktoHasWidth" style="width: 10px;"></div><input id="FirstName" name="FirstName" maxlength="255" aria-labelledby="LblFirstName InstructFirstName" type="text" class="mktoField mktoTextField mktoHasWidth mktoRequired" aria-required="true" style="width: 150px;"><span id="InstructFirstName" tabindex="-1" class="mktoInstruction"></span><div class="mktoClear"></div></div><div class="mktoClear"></div></div><div class="mktoFieldDescriptor mktoFormCol" style="margin-bottom: 10px;"><div class="mktoOffset" style="width: 10px;"></div><div class="mktoFieldWrap mktoRequiredField"><label for="LastName" id="LblLastName" class="mktoLabel mktoHasWidth" style="width: 121px;"><div class="mktoAsterix">*</div>Last Name</label><div class="mktoGutter mktoHasWidth" style="width: 10px;"></div><input id="LastName" name="LastName" maxlength="255" aria-labelledby="LblLastName InstructLastName" type="text" class="mktoField mktoTextField mktoHasWidth mktoRequired" aria-required="true" style="width: 150px;"><span id="InstructLastName" tabindex="-1" class="mktoInstruction"></span><div class="mktoClear"></div></div><div class="mktoClear"></div></div><div class="mktoClear"></div></div><div class="mktoFormRow"><div class="mktoFieldDescriptor mktoFormCol" style="margin-bottom: 10px;"><div class="mktoOffset" style="width: 10px;"></div><div class="mktoFieldWrap mktoRequiredField"><label for="Company" id="LblCompany" class="mktoLabel mktoHasWidth" style="width: 121px;"><div class="mktoAsterix">*</div>Company</label><div class="mktoGutter mktoHasWidth" style="width: 10px;"></div><input id="Company" name="Company" maxlength="255" aria-labelledby="LblCompany InstructCompany" type="text" class="mktoField mktoTextField mktoHasWidth mktoRequired" aria-required="true" style="width: 150px;"><span id="InstructCompany" tabindex="-1" class="mktoInstruction"></span><div class="mktoClear"></div></div><div class="mktoClear"></div></div><div class="mktoFieldDescriptor mktoFormCol" style="margin-bottom: 10px;"><div class="mktoOffset" style="width: 10px;"></div><div class="mktoFieldWrap mktoRequiredField"><label for="Title" id="LblTitle" class="mktoLabel mktoHasWidth" style="width: 121px;"><div class="mktoAsterix">*</div>Job Title</label><div class="mktoGutter mktoHasWidth" style="width: 10px;"></div><input id="Title" name="Title" maxlength="255" aria-labelledby="LblTitle InstructTitle" type="text" class="mktoField mktoTextField mktoHasWidth mktoRequired" aria-required="true" style="width: 150px;"><span id="InstructTitle" tabindex="-1" class="mktoInstruction"></span><div class="mktoClear"></div></div><div class="mktoClear"></div></div><div class="mktoClear"></div></div><div class="mktoFormRow"><div class="mktoFieldDescriptor mktoFormCol" style="margin-bottom: 10px;"><div class="mktoOffset" style="width: 10px;"></div><div class="mktoFieldWrap mktoRequiredField"><label for="Email" id="LblEmail" class="mktoLabel mktoHasWidth" style="width: 121px;"><div class="mktoAsterix">*</div>Work Email</label><div class="mktoGutter mktoHasWidth" style="width: 10px;"></div><input id="Email" name="Email" maxlength="255" aria-labelledby="LblEmail InstructEmail" type="email" class="mktoField mktoEmailField mktoHasWidth mktoRequired" aria-required="true" style="width: 150px;"><span id="InstructEmail" tabindex="-1" class="mktoInstruction"></span><div class="mktoClear"></div></div><div class="mktoClear"></div></div><div class="mktoClear"></div></div><div class="mktoFormRow"><div class="mktoFieldDescriptor mktoFormCol" style="margin-bottom: 10px;"><div class="mktoOffset" style="width: 10px;"></div><div class="mktoFieldWrap mktoRequiredField"><label for="Country" id="LblCountry" class="mktoLabel mktoHasWidth" style="width: 121px;"><div class="mktoAsterix">*</div>Country</label><div class="mktoGutter mktoHasWidth" style="width: 10px;"></div><select id="Country" name="Country" aria-labelledby="LblCountry InstructCountry" class="mktoField mktoHasWidth mktoRequired" aria-required="true" style="width: 150px;"><option value="">Select...</option><option value="Afghanistan">Afghanistan	</option><option value="Albania">Albania	</option><option value="Algeria">Algeria	</option><option value="Andorra">Andorra	</option><option value="Angola">Angola	</option><option value="Antigua &amp; Barbuda">Antigua &amp; Barbuda	</option><option value="Argentina">Argentina	</option><option value="Armenia">Armenia	</option><option value="Australia">Australia	</option><option value="Austria">Austria	</option><option value="Azerbaijan">Azerbaijan	</option><option value="Bahamas">Bahamas	</option><option value="Bahrain">Bahrain	</option><option value="Bangladesh">Bangladesh	</option><option value="Barbados">Barbados	</option><option value="Belarus">Belarus	</option><option value="Belgium">Belgium	</option><option value="Belize">Belize	</option><option value="Benin">Benin	</option><option value="Bhutan">Bhutan	</option><option value="Bolivia, Plurinational State of">Bolivia	</option><option value="Bosnia and Herzegovina">Bosnia &amp; Herzegovina	</option><option value="Botswana">Botswana	</option><option value="Brazil">Brazil	</option><option value="Brunei Darussalam">Brunei	</option><option value="Bulgaria">Bulgaria	</option><option value="Burkina Faso">Burkina Faso	</option><option value="Burundi">Burundi	</option><option value="Cambodia">Cambodia	</option><option value="Cameroon">Cameroon	</option><option value="Canada">Canada	</option><option value="Cape Verde">Cape Verde	</option><option value="Central African Republic">Central African Republic	</option><option value="Chad">Chad	</option><option value="Chile">Chile	</option><option value="China">China	</option><option value="Colombia">Colombia	</option><option value="Comoros">Comoros	</option><option value="Congo">Congo	</option><option value="Congo Democratic Republic">Congo Democratic Republic	</option><option value="Costa Rica">Costa Rica	</option><option value="Cote d'Ivoire">Cote d'Ivoire	</option><option value="Croatia">Croatia	</option><option value="Cyprus">Cyprus	</option><option value="Czech Republic">Czech Republic	</option><option value="Denmark">Denmark	</option><option value="Djibouti">Djibouti	</option><option value="Dominica">Dominica	</option><option value="Dominican Republic">Dominican Republic	</option><option value="East Timor">East Timor	</option><option value="Ecuador">Ecuador	</option><option value="Egypt">Egypt	</option><option value="El Salvador">El Salvador	</option><option value="Equatorial Guinea">Equatorial Guinea	</option><option value="Eritrea">Eritrea	</option><option value="Estonia">Estonia	</option><option value="Ethiopia">Ethiopia	</option><option value="Fiji">Fiji	</option><option value="Finland">Finland	</option><option value="France">France	</option><option value="Gabon">Gabon	</option><option value="Gambia">Gambia	</option><option value="Georgia">Georgia	</option><option value="Germany">Germany	</option><option value="Ghana">Ghana	</option><option value="Greece">Greece	</option><option value="Grenada">Grenada	</option><option value="Guatemala">Guatemala	</option><option value="Guinea">Guinea	</option><option value="Guinea-Bissau">Guinea-Bissau	</option><option value="Guyana">Guyana	</option><option value="Haiti">Haiti	</option><option value="Honduras">Honduras	</option><option value="Hungary">Hungary	</option><option value="Iceland">Iceland	</option><option value="India">India	</option><option value="Indonesia">Indonesia	</option><option value="Iraq">Iraq	</option><option value="Ireland">Ireland	</option><option value="Israel">Israel	</option><option value="Italy">Italy	</option><option value="Jamaica">Jamaica	</option><option value="Japan">Japan	</option><option value="Jordan">Jordan	</option><option value="Kazakhstan">Kazakhstan	</option><option value="Kenya">Kenya	</option><option value="Kiribati">Kiribati	</option><option value="Korea, Republic of">Korea South	</option><option value="Kosovo">Kosovo	</option><option value="Kuwait">Kuwait	</option><option value="Kyrgyzstan">Kyrgyzstan	</option><option value="Lao People’s Democratic Republic">Laos	</option><option value="Latvia">Latvia	</option><option value="Lebanon">Lebanon	</option><option value="Lesotho">Lesotho	</option><option value="Liberia">Liberia	</option><option value="Libya">Libya	</option><option value="Liechtenstein">Liechtenstein	</option><option value="Lithuania">Lithuania	</option><option value="Luxembourg">Luxembourg	</option><option value="Macedonia">Macedonia	</option><option value="Madagascar">Madagascar	</option><option value="Malawi">Malawi	</option><option value="Malaysia">Malaysia	</option><option value="Maldives">Maldives	</option><option value="Mali">Mali	</option><option value="Malta">Malta	</option><option value="Marshall Islands">Marshall Islands	</option><option value="Mauritania">Mauritania	</option><option value="Mauritius">Mauritius	</option><option value="Mexico">Mexico	</option><option value="Micronesia">Micronesia	</option><option value="Moldova, Republic of">Moldova	</option><option value="Monaco">Monaco	</option><option value="Mongolia">Mongolia	</option><option value="Montenegro">Montenegro	</option><option value="Morocco">Morocco	</option><option value="Mozambique">Mozambique	</option><option value="Myanmar">Myanmar (Burma)	</option><option value="Namibia">Namibia	</option><option value="Nauru">Nauru	</option><option value="Nepal">Nepal	</option><option value="New Zealand">New Zealand	</option><option value="Nicaragua">Nicaragua	</option><option value="Niger">Niger	</option><option value="Nigeria">Nigeria	</option><option value="Norway">Norway	</option><option value="Oman">Oman	</option><option value="Pakistan">Pakistan	</option><option value="Palau">Palau	</option><option value="Palestinian State*">Palestinian State*	</option><option value="Panama">Panama	</option><option value="Papua New Guinea">Papua New Guinea	</option><option value="Paraguay">Paraguay	</option><option value="Peru">Peru	</option><option value="Poland">Poland	</option><option value="Portugal">Portugal </option><option value="Qatar">Qatar	</option><option value="Romania">Romania	</option><option value="Rwanda">Rwanda	</option><option value="Samoa">Samoa	</option><option value="San Marino">San Marino	</option><option value="Sao Tome &amp; Principe">Sao Tome &amp; Principe	</option><option value="Saudi Arabia">Saudi Arabia	</option><option value="Senegal">Senegal	</option><option value="Serbia">Serbia	</option><option value="Seychelles">Seychelles	</option><option value="Sierra Leone">Sierra Leone	</option><option value="Singapore">Singapore	</option><option value="Slovakia">Slovakia	</option><option value="Slovenia">Slovenia	</option><option value="Solomon Islands">Solomon Islands	</option><option value="Somalia">Somalia	</option><option value="South Africa">South Africa	</option><option value="South Sudan">South Sudan	</option><option value="Spain">Spain	</option><option value="Sri Lanka">Sri Lanka	</option><option value="St. Kitts &amp; Nevis">St. Kitts &amp; Nevis	</option><option value="St. Lucia">St. Lucia	</option><option value="St. Vincent &amp; The Grenadines">St. Vincent &amp; The Grenadines	</option><option value="Sudan">Sudan	</option><option value="Suriname">Suriname	</option><option value="Swaziland">Swaziland	</option><option value="Sweden">Sweden	</option><option value="Switzerland">Switzerland	</option><option value="Tajikistan">Tajikistan	</option><option value="Tanzania, United Republic of">Tanzania	</option><option value="Thailand">Thailand	</option><option value="Netherlands">The Netherlands	</option><option value="Philippines">The Philippines	</option><option value="Togo">Togo	</option><option value="Tonga">Tonga	</option><option value="Trinidad and Tobago">Trinidad &amp; Tobago	</option><option value="Tunisia">Tunisia	</option><option value="Turkey">Turkey	</option><option value="Turkmenistan">Turkmenistan	</option><option value="Tuvalu">Tuvalu	</option><option value="Uganda">Uganda	</option><option value="Ukraine">Ukraine	</option><option value="United Arab Emirates">United Arab Emirates	</option><option value="United Kingdom">United Kingdom	</option><option value="United States">United States of America	</option><option value="Uruguay">Uruguay	</option><option value="Uzbekistan">Uzbekistan	</option><option value="Vanuatu">Vanuatu	</option><option value="Vatican City (Holy See)">Vatican City (Holy See)	</option><option value="Venezuela">Venezuela	</option><option value="Vietnam">Vietnam	</option><option value="Yemen">Yemen	</option><option value="Zambia">Zambia	</option><option value="Zimbabwe">Zimbabwe	</option></select><span id="InstructCountry" tabindex="-1" class="mktoInstruction"></span><div class="mktoClear"></div></div><div class="mktoClear"></div></div><div class="mktoPlaceholder mktoPlaceholderState"></div><div class="mktoPlaceholder mktoPlaceholderspecialAdministrativeRegion"></div><div class="mktoClear"></div></div><div class="mktoFormRow"><input type="hidden" name="utmcampaign" class="mktoField mktoFieldDescriptor mktoFormCol" value="" style="margin-bottom: 10px;"><div class="mktoClear"></div></div><div class="mktoFormRow"><input type="hidden" name="utmcontent" class="mktoField mktoFieldDescriptor mktoFormCol" value="" style="margin-bottom: 10px;"><div class="mktoClear"></div></div><div class="mktoFormRow"><input type="hidden" name="utmmedium" class="mktoField mktoFieldDescriptor mktoFormCol" value="" style="margin-bottom: 10px;"><div class="mktoClear"></div></div><div class="mktoFormRow"><input type="hidden" name="utmsource" class="mktoField mktoFieldDescriptor mktoFormCol" value="" style="margin-bottom: 10px;"><div class="mktoClear"></div></div><div class="mktoFormRow"><input type="hidden" name="utmterm" class="mktoField mktoFieldDescriptor mktoFormCol" value="" style="margin-bottom: 10px;"><div class="mktoClear"></div></div><div class="mktoFormRow"><input type="hidden" name="utmadtype" class="mktoField mktoFieldDescriptor mktoFormCol" value="" style="margin-bottom: 10px;"><div class="mktoClear"></div></div><div class="mktoFormRow"><input type="hidden" name="utmadgroup" class="mktoField mktoFieldDescriptor mktoFormCol" value="" style="margin-bottom: 10px;"><div class="mktoClear"></div></div><div class="mktoFormRow"><div class="mktoFieldDescriptor mktoFormCol" style="margin-bottom: 10px;"><div class="mktoOffset" style="width: 10px;"></div><div class="mktoFieldWrap"><label for="Marketing_Comms_Opt_in_Source__c" id="LblMarketing_Comms_Opt_in_Source__c" class="mktoLabel mktoHasWidth" style="width: 176px;"><div class="mktoAsterix">*</div><span style="font-family: arial, helvetica, sans-serif; font-size: 12px;">Yes, I would like to receive regular updates on thought leadership, industry insights and upcoming events from Korn Ferry. I understand that I may withdraw my consent at any time. Review Korn Ferry’s Privacy Policy <a href="https://www.kornferry.com/privacy">here</a>.</span></label><div class="mktoGutter mktoHasWidth" style="width: 10px;"></div><div class="mktoLogicalField mktoCheckboxList mktoHasWidth" style="width: 50px;"><input name="Marketing_Comms_Opt_in_Source__c" id="Marketing_Comms_Opt_in_Source__c" type="checkbox" value="Marketing: Form" aria-labelledby="LblMarketing_Comms_Opt_in_Source__c InstructMarketing_Comms_Opt_in_Source__c" class="mktoField"><label for="Marketing_Comms_Opt_in_Source__c" id="LblMarketing_Comms_Opt_in_Source__c"></label></div><span id="InstructMarketing_Comms_Opt_in_Source__c" tabindex="-1" class="mktoInstruction"></span><div class="mktoClear"></div></div><div class="mktoClear"></div></div><div class="mktoClear"></div></div><div class="mktoFormRow"><input type="hidden" name="lastAssetDownloaded" class="mktoField mktoFieldDescriptor mktoFormCol" value="" style="margin-bottom: 10px;"><div class="mktoClear"></div></div><div class="mktoFormRow"><input type="hidden" name="marketoSource" class="mktoField mktoFieldDescriptor mktoFormCol" value="Download ENG" style="margin-bottom: 10px;"><div class="mktoClear"></div></div><div class="mktoFormRow"><input type="hidden" name="assetNameToken" class="mktoField mktoFieldDescriptor mktoFormCol" value="" style="margin-bottom: 10px;"><div class="mktoClear"></div></div><div class="mktoFormRow"><div class="mktoPlaceholder mktoPlaceholdermarketingCommsOptinDataTransfer"></div><div class="mktoClear"></div></div><div class="mktoButtonRow"><span class="mktoButtonWrap mktoInset" style="margin-left: 120px;"><button type="submit" class="mktoButton btn">Submit</button></span></div><input type="hidden" name="formid" class="mktoField mktoFieldDescriptor" value="1002"><input type="hidden" name="munchkinId" class="mktoField mktoFieldDescriptor" value="251-OLR-958"></form></div></div>
