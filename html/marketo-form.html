@@ -149,7 +149,7 @@
     }
 
     /* Style labels that are not next to checkboxes which are often unique disclaimers */
-
+    /* main label styles*/
     .mktoForm .mktoFieldWrap:not(:has(label ~ .mktoCheckboxList)) label {
         color: var(--inputs--forms--input-label, var(--korn-ferry-mast-library---inputs--forms--input-label, var(--korn-ferry-mast-library_components---input-label--color, #8c8c8c)));
         font-size: var(--_components---input-label--font-size, var(--korn-ferry-mast-library_components---input-label--font-size, 14px));
@@ -256,11 +256,11 @@
     }
 }
 
-
+/* Style B*/
 .kf-mktoform.kf-mktoform-b {
 
-    /* --- Labels: forest green, not uppercase, adjusted typography --- */
     .mktoForm .mktoFieldWrap:not(:has(label ~ .mktoCheckboxList)) label {
+        color: var(--korn-ferry-mast-library_color-primary---forest--forest-950, var(--_color-primary---forest--forest-950, #00634F));
         text-transform: none;
         line-height: 32px;
         letter-spacing: -0.28px;
@@ -380,8 +380,12 @@
 .u-mode-invert .kf-mktoform.kf-mktoform-b,
 .u-mode-invert.kf-mktoform.kf-mktoform-b,
 .korn-ferry-mast-library--u-mode-invert.kf-mktoform.kf-mktoform-b {
+    .mktoForm .mktoFieldWrap:not(:has(label ~ .mktoCheckboxList)) label {
+        /* Reset to dark mode color */
+        color: var(--inputs--forms--input-label, var(--korn-ferry-mast-library---inputs--forms--input-label, var(--korn-ferry-mast-library_components---input-label--color, #ffffff)));
+    }
     input, select, textarea {
-        /* enforce color for style b darkmode */
+        /* enforce input color for style b darkmode */
         color: var(--korn-ferry-mast-library_color-primary---forest--forest-950, var(--_color-primary---forest--forest-950, #00634F));
     }
 
