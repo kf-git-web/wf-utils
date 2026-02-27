@@ -62,21 +62,31 @@ export const kfVideoBackgrounds = {
                     const h = dimensions[1];
                     const iframe = player.element;
                     if (iframe) {
-                        iframe.style.position = "absolute";
-                        iframe.style.width = "100%";
-                        iframe.style.height = "auto";
                         iframe.style.aspectRatio = `${w} / ${h}`;
+                        // iframe.style.width = "120%";
+                        // iframe.style.height = "auto";
+                        // iframe.style.left = "50%";
+                        // iframe.style.transform = "translateX(-50%)";
                     }
                     console.log(`${moduleName} Initialized ${label}: ${w}x${h}`);
+                    const wrapper = containerEl.closest('[data-kf-video-backgrounds="true"]');
+                    if (wrapper) {
+                        setTimeout(function () {
+                            wrapper.querySelectorAll(".kf-video-bg-helper").forEach(function (el) {
+                                el.classList.remove("kf-video-bg-fade-in");
+                            });
+                        }, 1500);
+                    }
                 })
                 .catch(function (err) {
                     console.warn(`${moduleName} Failed to get dimensions for ${label}, falling back to 16/9:`, err);
                     const iframe = player.element;
                     if (iframe) {
-                        iframe.style.position = "absolute";
-                        iframe.style.width = "100%";
-                        iframe.style.height = "auto";
                         iframe.style.aspectRatio = "16 / 9";
+                        // iframe.style.width = "120%";
+                        // iframe.style.height = "auto";
+                        // iframe.style.left = "50%";
+                        // iframe.style.transform = "translateX(-50%)";
                     }
                 });
         }
