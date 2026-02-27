@@ -12,6 +12,7 @@ import {updateFooterYear} from "./modules/updateFooterYear";
 import {observeFsPageCount} from "./modules/observeFsPageCount";
 import {preventHashNavigation} from "./modules/preventHashNavigation";
 import {articleVisibility} from "./modules/articleVisibility";
+import {kfVideoBackgrounds} from "./modules/bg-video";
 
 /* Queue all tasks (safe to run before or after the readyQueue loader) */
 
@@ -346,7 +347,10 @@ const createReadyQueueLogHelpers = (w) => {
     articleVisibility,
 
     // Prevent hash URLs while maintaining scroll navigation
-    preventHashNavigation
+    preventHashNavigation,
+
+    // Vimeo background video initialisation
+    kfVideoBackgrounds
     /* End Pushing to Queue */
 );
 
