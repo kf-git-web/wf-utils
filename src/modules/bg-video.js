@@ -74,6 +74,7 @@ export const kfVideoBackgrounds = {
                         setTimeout(function () {
                             wrapper.querySelectorAll(".kf-video-bg-helper").forEach(function (el) {
                                 el.classList.remove("kf-video-bg-fade-in");
+                                el.style.opacity = "1";
                             });
                         }, 1500);
                     }
