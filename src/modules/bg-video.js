@@ -3,7 +3,7 @@ export const kfVideoBackgrounds = {
     fn: () => {
         const moduleName = "kfVideoBackgrounds";
         if (!window.Vimeo) {
-            console.error(`${moduleName} Vimeo Player SDK (window.Vimeo) not available.`);
+            console.info(`${moduleName} window.Vimeo not available.`);
             return;
         }
 
@@ -116,3 +116,6 @@ export const kfVideoBackgrounds = {
         });
     }
 };
+
+
+
