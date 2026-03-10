@@ -13,6 +13,7 @@ import {observeFsPageCount} from "./modules/observeFsPageCount";
 import {preventHashNavigation} from "./modules/preventHashNavigation";
 import {articleVisibility} from "./modules/articleVisibility";
 import {kfVideoBackgrounds} from "./modules/bg-video";
+import {fontSizeReducer} from "./modules/fontSizeReducer";
 
 /* Queue all tasks (safe to run before or after the readyQueue loader) */
 
@@ -349,8 +350,11 @@ const createReadyQueueLogHelpers = (w) => {
     // Prevent hash URLs while maintaining scroll navigation
     preventHashNavigation,
 
-    // Vimeo background video initialisation
-    kfVideoBackgrounds
+    // Vimeo background video initialization
+    kfVideoBackgrounds,
+
+    // Wrap font-reduction modifier elements in a .dynamic-reduce span
+    fontSizeReducer
     /* End Pushing to Queue */
 );
 
