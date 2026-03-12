@@ -14,6 +14,7 @@ import {preventHashNavigation} from "./modules/preventHashNavigation";
 import {articleVisibility} from "./modules/articleVisibility";
 import {kfVideoBackgrounds} from "./modules/bg-video";
 import {fontSizeReducer} from "./modules/fontSizeReducer";
+import {t2HeaderPerspectiveReveal} from "./modules/perspectiveReveal";
 
 /* Queue all tasks (safe to run before or after the readyQueue loader) */
 
@@ -354,7 +355,10 @@ const createReadyQueueLogHelpers = (w) => {
     kfVideoBackgrounds,
 
     // Wrap font-reduction modifier elements in a .dynamic-reduce span
-    fontSizeReducer
+    fontSizeReducer,
+
+    // T2 header perspective panel toggle
+    t2HeaderPerspectiveReveal
     /* End Pushing to Queue */
 );
 
