@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  <style>
+    .kf-mktoform {
+      .mktoForm {
+        font-family: var(--korn-ferry-mast-library---fonts--primary-font), Gotham, Arial, sans-serif !important;
+        /* Undo inline styles */
+        width: 100% !important;
+        font-size: unset !important;
+        /* base font color */
+        color: unset !important;
+        /*color: var(--korn-ferry-mast-library---typography-colors--text-base, var(--typography-colors--text-base, unset)) !important;*/
+      }
+
+      .mktoAsterix, .mktoGutter, .mktoOffset, .mktoClear {
+        display: none !important;
+      }
+
+      .mktoPlaceholder {
+        float: unset !important;
+      }
+
+      .mktoPlaceholder:empty {
+        display: none !important;
+      }
+
+      .mktoFieldWrap {
+        width: 100% !important;
+      }
+
+      .mktoFormRow {
+        display: flex;
+        gap: 2rem;
+
+        .mktoFormCol {
+          width: 100%;
+          flex: 1 1 50%;
+        }
+      }
+
+      @media screen and (max-width: 767px) {
+        .mktoFormRow {
+          flex-direction: column;
+          gap: 0;
+        }
+      }
+
+      input, select, textarea {
+        font-family: var(--korn-ferry-mast-library_components---input--font, var(--_components---input--font));
+        appearance: none;
+        border-top: none !important;
+        border-left: none !important;
+        border-right: none !important;
+        border-style: none none solid;
+        border-color: var(--korn-ferry-mast-library_color-primary---neutral--neutral-500, var(--_color-primary---neutral--neutral-500, grey)) var(--korn-ferry-mast-library_color-primary---neutral--neutral-500, var(--_color-primary---neutral--neutral-500, grey)) var(--korn-ferry-mast-library_color-emerald---emerald--emerald-950, var(--_color-emerald---emerald--emerald-950, #05c690)) !important;
+        border-radius: var(--korn-ferry-mast-library_components---input--border-radius, var(--_components---input--border-radius, 0rem)) !important;
+        box-shadow: none !important;
+        background-color: var(--korn-ferry-mast-library---inputs--forms--field-background, var(--inputs--forms--field-background, #e5e7eb)) !important;
+        color: var(--korn-ferry-mast-library---typography-colors--text-base, var(--typography-colors--text-base, #053328)) !important;
+        font-size: var(--korn-ferry-mast-library_components---input--font-size, var(--_components---input--font-size, 1.125rem)) !important;
+        line-height: var(--korn-ferry-mast-library_components---input--line-height, var(--_components---input--line-height, 1.5em)) !important;
+        font-weight: var(--korn-ferry-mast-library_components---input--font-weight, var(--_components---input--font-weight, 400)) !important;
+        letter-spacing: var(--korn-ferry-mast-library_components---input--letter-spacing, var(--_components---input--letter-spacing, 0em)) !important;
+        padding: var(--korn-ferry-mast-library_components---button--vertical-padding, var(--_components---button--vertical-padding, 1rem)) var(--korn-ferry-mast-library_components---button--horizontal-padding, var(--_components---button--horizontal-padding, 1rem)) !important;
+        height: auto !important;
+        width: 100% !important;
+        margin-bottom: var(--korn-ferry-mast-library_components---input--bottom-margin, var(--_components---input--bottom-margin, 1rem)) !important;
+        display: block !important;
+      }
+
+      .mktoForm select.mktoField {
+        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%2300634F" d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/></svg>');
+        background-position: 98%;
+        background-repeat: no-repeat;
+        background-size: 16px;
+        padding-left: .8rem;
+      }
+
+      input:focus, select:focus, textarea:focus {
+        border-bottom: 1px dashed var(--korn-ferry-mast-library---inputs--forms--form-focus-border, var(--korn-ferry-mast-library_color-emerald---emerald--emerald-950, var(--_color-emerald---emerald--emerald-950))) !important;
+      }
+
+      input::placeholder, select::placeholder, textarea::placeholder {
+        color: var(--korn-ferry-mast-library---inputs--forms--input-label) !important;
+      }
+
+      /*TODO: ADD select checked style */
+      /* TODO: Remove invalid border style*/
+
+      input[type="checkbox"] {
+        margin-bottom: 0 !important;
+        padding: unset !important;
+        opacity: 0;
+      }
+
+
+      input[type=checkbox]:checked + label:before {
+        content: "\2713 ";
+        color: white;
+        border: 1px solid var(--korn-ferry-mast-library_color-emerald---emerald--emerald-950,var(--_color-emerald---emerald--emerald-950,#05c690));
+        background-color: var(--korn-ferry-mast-library_color-emerald---emerald--emerald-950,var(--_color-emerald---emerald--emerald-950,#05c690));
+      }
+      input[type=checkbox] + label:before,
+      input[type=radio] + label:before
+      {
+        content: "";
+        position:absolute;
+        width:1em;
+        height:1em;
+        margin-left:-1.5em;
+        line-height:1em;
+        font-family:Arial, sans-serif;
+        font-size:13px;
+        border: 2px solid var(--korn-ferry-mast-library---inputs--forms--input-label,var(--inputs--forms--input-label,#8c8c8c));
+        box-shadow: none;
+        background:#0000;
+        color: white;
+        border-radius: 2px;
+      }
+
+      label#LblmarketingCommsOptinDataTransfer:before {
+        content: unset
+      }
+
+      input#marketingCommsOptinDataTransfer {
+        width: auto
+      }
+
+      .mktoFormRow .mktoFormCol {
+        margin-bottom: 0 !important;
+        float: unset !important;
+        min-height: unset !important;
+      }
+
+      .mktoHtmlText.mktoHasWidth,.mktoHtmlText {
+        /* Overrides for arbitrary text */
+        width: auto !important;
+        font-family: var(--korn-ferry-mast-library---fonts--primary-font), Gotham, Arial, sans-serif !important;
+        color: var(--korn-ferry-mast-library---typography-colors--text-base, var(--typography-colors--text-base)) !important;
+        span{
+          font-family: var(--korn-ferry-mast-library---fonts--primary-font), Gotham, Arial, sans-serif !important;
+          color: var(--korn-ferry-mast-library---typography-colors--text-base, var(--typography-colors--text-base)) !important;
+        }
+      }
+
+      /* Generic label styles */
+
+      .mktoForm .mktoFieldWrap label {
+        font-family: var(--korn-ferry-mast-library---fonts--primary-font), Gotham, Arial, sans-serif !important;
+        width: 100% !important;
+      }
+
+      /* Style labels that are not next to checkboxes which are often unique disclaimers */
+      /* main label styles*/
+      .mktoForm .mktoFieldWrap:not(:has(label ~ .mktoCheckboxList)) label {
+        color: var(--inputs--forms--input-label, var(--korn-ferry-mast-library---inputs--forms--input-label, var(--korn-ferry-mast-library_components---input-label--color, #8c8c8c)));
+        font-size: var(--_components---input-label--font-size, var(--korn-ferry-mast-library_components---input-label--font-size, 14px));
+        line-height: var(--_components---input-label--line-height, var(--korn-ferry-mast-library_components---input-label--line-height, 1em));
+        font-weight: var(--_components---input-label--font-weight, var(--korn-ferry-mast-library_components---input-label--font-weight, 500));
+        letter-spacing: var(--_components---input-label--letter-spacing, var(--korn-ferry-mast-library_components---input-label--letter-spacing, 0em));
+        text-transform: uppercase;
+        margin-bottom: 5px;
+        padding-top: 0;
+        padding-bottom: .125rem;
+        position: relative;
+        width: auto !important;
+      }
+
+      .mktoFormRow .mktoFieldWrap a {
+        color: var(--korn-ferry-mast-library---typography-colors--text-base, var(--typography-colors--text-base)) !important;
+        text-decoration-line: underline !important;
+        text-decoration-style: solid !important;
+        text-decoration-skip-ink: auto !important;
+        text-decoration-color: var(--korn-ferry-mast-library_color-emerald---emerald--emerald-950, var(--_color-emerald---emerald--emerald-950, #05C690)) !important;
+        text-decoration-thickness: 10% !important;
+        text-underline-offset: auto !important;
+        text-underline-position: from-font !important;
+      }
+
+      .mktoFieldWrap .mktoErrorArrowWrap {
+        /* Hides tooltop arrow display, seems like used to avoid poor alignment*/
+        display: none;
+      }
+
+      .mktoFormRow .mktoFieldWrap:has(.mktoCheckboxList) {
+        font-size: 14px;
+      }
+
+      /* must be applied to all disclaimer text fields */
+      .mktoFormRow .mktoFieldWrap:has(.mktoCheckboxList) span {
+        font-size: 14px !important;
+        text-transform: none !important;
+        color: var(--korn-ferry-mast-library---typography-colors--text-base, var(--typography-colors--text-base)) !important;
+        font-style: normal;
+        font-weight: 400 !important;
+        line-height: 150%;
+        font-family: var(--korn-ferry-mast-library---fonts--primary-font, var(--fonts--primary-font)), Gotham, Arial, sans-serif !important;
+      }
+
+      .mktoFieldWrap:has(.mktoCheckboxList) {
+        display: flex;
+        gap: 1rem;
+
+        .mktoCheckboxList {
+          order: 1;
+          width: auto !important;
+          padding: 0 !important;
+          float: unset !important;
+        }
+        label{
+          order: 999;
+          line-height: 150%;
+          font-weight: 400;
+        }
+      }
+
+      /* override for job candidate field(s) */
+      .mktoFieldWrap:has(> #LbljobCandidate) {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+
+        label, .mktoCheckboxList {
+          width: auto !important;
+          flex: 0 0 auto;
+          max-width: 100%;
+        }
+      }
+
+      .mktoButtonRow {
+        text-align: left;
+        margin-top: 1rem;
+
+        .mktoInset, .mktoButtonWrap {
+          margin-left: unset !important;
+
+          .mktoButton {
+            /*color: white;*/
+            /*border-radius: 3px;*/
+            /*background: var(--korn-ferry-mast-library_color-primary---forest--forest-950, #00634F) !important;*/
+            /*font-weight: 700;*/
+            /*padding: 1.25rem !important;*/
+            /*font-size: 1.375rem !important;*/
+            /*background-image: unset !important;*/
+            /*box-shadow: unset !important;*/
+            /*border: none !important;*/
+          }
+        }
+      }
+    }
+
+
+    /* force single-column fields at any breakpoint */
+    .kf-mktoform.kf-mktoform-1up,
+    .kf-mktoform .mktoForm.kf-mktoform-1up,
+    .kf-mktoform:has(.kf-mktoform-1up){
+      .mktoFormRow {
+        flex-direction: column;
+        gap: 0;
+      }
+      .mktoButtonRow{
+        text-align: center;
+        width:100%;
+      }
+    }
+
+    /* Style B*/
+    .kf-mktoform.kf-mktoform-b {
+
+      .mktoForm .mktoFieldWrap:not(:has(label ~ .mktoCheckboxList)) label {
+        color: var(--korn-ferry-mast-library_color-primary---forest--forest-950, var(--_color-primary---forest--forest-950, #00634F));
+        text-transform: none;
+        line-height: 32px;
+        letter-spacing: -0.28px;
+      }
+
+      /* --- Inputs / selects / textarea: full border, white bg, rounded corners --- */
+      input, select, textarea {
+        border-style: solid !important;
+        border-width: 1px !important;
+        border-color: var(--korn-ferry-mast-library_color-primary---utility--light-gray, var(--_color-primary---utility--light-gray, #dad8d6)) !important;
+        background-color: #fff !important;
+        color: var(--korn-ferry-mast-library---typography-colors--text-base, var(--typography-colors--text-base, #053328)) !important;
+      }
+
+      .mktoForm select.mktoField {
+        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%230008" d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/></svg>');
+      }
+
+      input:focus, select:focus, textarea:focus {
+        border-color: var(--korn-ferry-mast-library_color-emerald---emerald--emerald-950, var(--_color-emerald---emerald--emerald-950, #05C690)) !important;
+        border-style: solid !important;
+      }
+
+      /* --- Radio buttons: green styled --- */
+      input[type="radio"] {
+        appearance: auto !important;
+        opacity: 1;
+        width: auto !important;
+        margin-bottom: 0 !important;
+        accent-color: var(--korn-ferry-mast-library_color-primary---forest--forest-950, var(--_color-primary---forest--forest-950, #00634F));
+        border-style: unset !important;
+        background-color: transparent !important;
+        padding: unset !important;
+        display: inline !important;
+      }
+
+      /* --- Checkbox: square, forest green accent --- */
+      input[type="checkbox"] {
+        accent-color: var(--korn-ferry-mast-library_color-primary---forest--forest-950, var(--_color-primary---forest--forest-950, #00634F));
+      }
+
+      /* --- HR divider before the opt-in row --- */
+      .mktoFieldWrap:has(> #LblMarketing_Comms_Opt_in_Source__c) {
+        border-top: 1px solid var(--korn-ferry-mast-library_color-primary---neutral--neutral-200, var(--_color-primary---neutral--neutral-200, #e5e7eb));
+        padding-top: 1.5rem;
+        margin-top: .5rem;
+      }
+
+      /* --- Submit button: full width, solid forest green --- */
+      .mktoButtonRow {
+        text-align: unset;
+        width: 100%;
+        padding-top: 3rem;
+
+        .mktoInset, .mktoButtonWrap {
+          display: block;
+          width: 100%;
+          .mktoButton {
+            width: 100%;
+            background: var(--korn-ferry-mast-library_color-primary---forest--forest-950, var(--_color-primary---forest--forest-950, #00634F)) !important;
+            background-image: none !important;
+            color: #fff !important;
+            font-weight: 700 !important;
+            font-size: 1rem !important;
+            padding: 1.25rem !important;
+            border: none !important;
+            border-radius: 4px !important;
+            box-shadow: none !important;
+            cursor: pointer;
+          }
+        }
+      }
+    }
+
+    /* Dark Mode Overrides */
+    .korn-ferry-mast-library--u-mode-invert .kf-mktoform, .u-mode-invert .kf-mktoform,
+    .u-mode-invert.kf-mktoform,
+    .korn-ferry-mast-library--u-mode-invert.kf-mktoform {
+      .mktoForm select.mktoField {
+        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free v6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path fill="%23fff" d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/></svg>');
+        background-position: 98%;
+        background-repeat: no-repeat;
+        background-size: 16px;
+        padding-left: .8rem;
+      }
+
+      /*    input, select, textarea {*/
+      /*        border-bottom: 1px solid var(--korn-ferry-mast-library_color-emerald---emerald--emerald-950, var(--_color-emerald---emerald--emerald-950)) !important;*/
+      /*        background-color: rgba(5, 51, 40, 0.80) !important;*/
+      /*        color: white !important;*/
+      /*    }*/
+
+      /*    input:focus, select:focus, textarea:focus {*/
+      /*        border-bottom: 1px solid white !important;*/
+      /*    }*/
+
+      /*    .mktoForm .mktoFormRow .mktoFieldWrap label {*/
+      /*        color: white;*/
+      /*    }*/
+
+      /*    .mktoFormRow .mktoFieldWrap a {*/
+      /*        color: white !important;*/
+      /*    }*/
+
+      /*    .mktoFormRow .mktoFieldWrap #LblMarketing_Comms_Opt_in_Source__c span {*/
+      /*        color: white;*/
+      /*    }*/
+
+      /*    .mktoButtonRow .mktoInset .mktoButton {*/
+      /*        !*color: white;*!*/
+      /*    }*/
+    }
+
+
+    /* Dark Mode Overrides - Style B */
+    .korn-ferry-mast-library--u-mode-invert .kf-mktoform.kf-mktoform-b,
+    .u-mode-invert .kf-mktoform.kf-mktoform-b,
+    .u-mode-invert.kf-mktoform.kf-mktoform-b,
+    .korn-ferry-mast-library--u-mode-invert.kf-mktoform.kf-mktoform-b {
+      .mktoForm .mktoFieldWrap:not(:has(label ~ .mktoCheckboxList)) label {
+        /* Reset to dark mode color */
+        color: var(--inputs--forms--input-label, var(--korn-ferry-mast-library---inputs--forms--input-label, var(--korn-ferry-mast-library_components---input-label--color, #ffffff)));
+      }
+      input, select, textarea {
+        /* enforce input color for style b darkmode */
+        color: var(--korn-ferry-mast-library_color-primary---forest--forest-950, var(--_color-primary---forest--forest-950, #00634F));
+      }
+
+    }
+
+  </style>
+</head>
+<body>
+<form id="mktoForm_1735" data-kf-generated="true" novalidate="novalidate" class="mktoForm mktoHasWidth mktoLayoutLeft" style="font-family: Helvetica, Arial, sans-serif; font-size: 13px; color: rgb(51, 51, 51); width: 853px;">
+  <div class="mktoFormRow">
+    <div class="mktoFieldDescriptor mktoFormCol" style="margin-bottom: 10px;">
+      <div class="mktoOffset" style="width: 10px;"></div>
+      <div class="mktoFieldWrap mktoRequiredField"><label for="FirstName" id="LblFirstName" class="mktoLabel mktoHasWidth" style="width: 121px;">
+        <div class="mktoAsterix">*</div>
+        First Name</label>
+        <div class="mktoGutter mktoHasWidth" style="width: 10px;"></div>
+        <input id="FirstName" name="FirstName" maxlength="255" aria-labelledby="LblFirstName InstructFirstName" type="text" class="mktoField mktoTextField mktoHasWidth mktoRequired" aria-required="true" style="width: 150px;"><span id="InstructFirstName" tabindex="-1" class="mktoInstruction"></span>
+        <div class="mktoClear"></div>
+      </div>
+      <div class="mktoClear"></div>
+    </div>
+    <div class="mktoFieldDescriptor mktoFormCol" style="margin-bottom: 10px;">
+      <div class="mktoOffset" style="width: 10px;"></div>
+      <div class="mktoFieldWrap mktoRequiredField"><label for="LastName" id="LblLastName" class="mktoLabel mktoHasWidth" style="width: 121px;">
+        <div class="mktoAsterix">*</div>
+        Last Name</label>
+        <div class="mktoGutter mktoHasWidth" style="width: 10px;"></div>
+        <input id="LastName" name="LastName" maxlength="255" aria-labelledby="LblLastName InstructLastName" type="text" class="mktoField mktoTextField mktoHasWidth mktoRequired" aria-required="true" style="width: 150px;"><span id="InstructLastName" tabindex="-1" class="mktoInstruction"></span>
+        <div class="mktoClear"></div>
+      </div>
+      <div class="mktoClear"></div>
+    </div>
+    <div class="mktoClear"></div>
+  </div>
+  <div class="mktoFormRow">
+    <div class="mktoFieldDescriptor mktoFormCol" style="margin-bottom: 10px;">
+      <div class="mktoOffset" style="width: 10px;"></div>
+      <div class="mktoFieldWrap mktoRequiredField"><label for="Company" id="LblCompany" class="mktoLabel mktoHasWidth" style="width: 121px;">
+        <div class="mktoAsterix">*</div>
+        Company</label>
+        <div class="mktoGutter mktoHasWidth" style="width: 10px;"></div>
+        <input id="Company" name="Company" maxlength="255" aria-labelledby="LblCompany InstructCompany" type="text" class="mktoField mktoTextField mktoHasWidth mktoRequired" aria-required="true" style="width: 150px;"><span id="InstructCompany" tabindex="-1" class="mktoInstruction"></span>
+        <div class="mktoClear"></div>
+      </div>
+      <div class="mktoClear"></div>
+    </div>
+    <div class="mktoFieldDescriptor mktoFormCol" style="margin-bottom: 10px;">
+      <div class="mktoOffset" style="width: 10px;"></div>
+      <div class="mktoFieldWrap mktoRequiredField"><label for="Title" id="LblTitle" class="mktoLabel mktoHasWidth" style="width: 121px;">
+        <div class="mktoAsterix">*</div>
+        Job Title</label>
+        <div class="mktoGutter mktoHasWidth" style="width: 10px;"></div>
+        <input id="Title" name="Title" maxlength="255" aria-labelledby="LblTitle InstructTitle" type="text" class="mktoField mktoTextField mktoHasWidth mktoRequired" aria-required="true" style="width: 150px;"><span id="InstructTitle" tabindex="-1" class="mktoInstruction"></span>
+        <div class="mktoClear"></div>
+      </div>
+      <div class="mktoClear"></div>
+    </div>
+    <div class="mktoClear"></div>
+  </div>
+  <div class="mktoFormRow">
+    <div class="mktoFieldDescriptor mktoFormCol" style="margin-bottom: 10px;">
+      <div class="mktoOffset" style="width: 10px;"></div>
+      <div class="mktoFieldWrap mktoRequiredField"><label for="Email" id="LblEmail" class="mktoLabel mktoHasWidth" style="width: 121px;">
+        <div class="mktoAsterix">*</div>
+        Email Address</label>
+        <div class="mktoGutter mktoHasWidth" style="width: 10px;"></div>
+        <input id="Email" name="Email" maxlength="255" aria-labelledby="LblEmail InstructEmail" type="email" class="mktoField mktoEmailField mktoHasWidth mktoRequired" aria-required="true" style="width: 150px;"><span id="InstructEmail" tabindex="-1" class="mktoInstruction"></span>
+        <div class="mktoClear"></div>
+      </div>
+      <div class="mktoClear"></div>
+    </div>
+    <div class="mktoFieldDescriptor mktoFormCol" style="margin-bottom: 10px;">
+      <div class="mktoOffset" style="width: 10px;"></div>
+      <div class="mktoFieldWrap mktoRequiredField"><label for="Phone" id="LblPhone" class="mktoLabel mktoHasWidth" style="width: 121px;">
+        <div class="mktoAsterix">*</div>
+        Phone Number</label>
+        <div class="mktoGutter mktoHasWidth" style="width: 10px;"></div>
+        <input id="Phone" name="Phone" maxlength="255" aria-labelledby="LblPhone InstructPhone" type="tel" class="mktoField mktoTelField mktoHasWidth mktoRequired" aria-required="true" style="width: 150px;"><span id="InstructPhone" tabindex="-1" class="mktoInstruction"></span>
+        <div class="mktoClear"></div>
+      </div>
+      <div class="mktoClear"></div>
+    </div>
+    <div class="mktoClear"></div>
+  </div>
+  <div class="mktoFormRow">
+    <div class="mktoFieldDescriptor mktoFormCol" style="margin-bottom: 10px;">
+      <div class="mktoOffset" style="width: 10px;"></div>
+      <div class="mktoFieldWrap mktoRequiredField"><label for="lOBInterest" id="LbllOBInterest" class="mktoLabel mktoHasWidth" style="width: 121px;">
+        <div class="mktoAsterix">*</div>
+        How can we help you?</label>
+        <div class="mktoGutter mktoHasWidth" style="width: 10px;"></div>
+        <select id="lOBInterest" name="lOBInterest" aria-labelledby="LbllOBInterest InstructlOBInterest" class="mktoField mktoHasWidth mktoRequired" aria-required="true" style="width: 150px;">
+          <option value="">Select...</option>
+          <option value="Consulting">Consulting</option>
+          <option value="Talent Acquisition">Talent Acquisition</option>
+          <option value="Digital">Products/HR Tech</option>
+          <option value="Support">Support</option>
+          <option value="Becoming a Candidate">Submit Your Resume/CV</option>
+        </select><span id="InstructlOBInterest" tabindex="-1" class="mktoInstruction"></span>
+        <div class="mktoClear"></div>
+      </div>
+      <div class="mktoClear"></div>
+    </div>
+    <div class="mktoClear"></div>
+  </div>
+  <div class="mktoFormRow">
+    <div class="mktoFieldDescriptor mktoFormCol" style="margin-bottom: 10px;">
+      <div class="mktoOffset" style="width: 10px;"></div>
+      <div class="mktoFieldWrap"><label for="Marketing_Comms_Opt_in_Source__c" id="LblMarketing_Comms_Opt_in_Source__c" class="mktoLabel mktoHasWidth" style="width: 176px;">
+        <div class="mktoAsterix">*</div>
+        <span style="font-family: arial, helvetica, sans-serif; font-size: 12px;">Yes, I would like to receive regular updates on thought leadership, industry insights and upcoming events from Korn Ferry. I understand that I may withdraw my consent at any time. Please review Korn Ferry’s <a href="https://www.kornferry.com/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and <a href="https://cdn.kornferry.com/privacy/Cookie.pdf" target="_blank" rel="noopener noreferrer">Cookie Policy</a>.</span></label>
+        <div class="mktoGutter mktoHasWidth" style="width: 10px;"></div>
+        <div class="mktoLogicalField mktoCheckboxList mktoHasWidth" style="width: 50px;">
+          <input name="Marketing_Comms_Opt_in_Source__c" id="Marketing_Comms_Opt_in_Source__c" type="checkbox" value="Marketing: Form" aria-labelledby="LblMarketing_Comms_Opt_in_Source__c InstructMarketing_Comms_Opt_in_Source__c" class="mktoField"><label for="Marketing_Comms_Opt_in_Source__c" id="LblMarketing_Comms_Opt_in_Source__c"></label>
+        </div>
+        <span id="InstructMarketing_Comms_Opt_in_Source__c" tabindex="-1" class="mktoInstruction"></span>
+        <div class="mktoClear"></div>
+      </div>
+      <div class="mktoClear"></div>
+    </div>
+    <div class="mktoClear"></div>
+  </div>
+  <div class="mktoFormRow">
+    <div class="mktoPlaceholder mktoPlaceholdermarketingCommsOptinDataTransfer"></div>
+    <div class="mktoClear"></div>
+  </div>
+  <div class="mktoFormRow">
+    <div class="mktoPlaceholder mktoPlaceholdersubscribeTextMessages"></div>
+    <div class="mktoClear"></div>
+  </div>
+  <div class="mktoButtonRow"><span class="mktoButtonWrap mktoInset" style="margin-left: 120px;"><button type="submit" class="mktoButton btn">Submit</button></span></div>
+  <input type="hidden" name="formid" class="mktoField mktoFieldDescriptor" value="1735"><input type="hidden" name="munchkinId" class="mktoField mktoFieldDescriptor" value="251-OLR-958"></form>
+
+</body>
+</html>
