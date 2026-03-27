@@ -654,19 +654,26 @@
       });
     }
 
-    // Password
+    // Password — hint text is pre-populated in #kfaMsgPassword; we only toggle classes
     if (_els.PASSWORD) {
       _els.PASSWORD.addEventListener("input", function () {
         var val = _els.PASSWORD.value;
         var score = validator.scorePassword(val);
-        if (_els.PW_METER) _els.PW_METER.value = score;
         var isValid = score === PASSWORD_SCORE_PASS;
-        setFieldState(
-          _els.PASSWORD,
-          _els.MSG_PASSWORD,
-          isValid,
-          val.length > 0 && !isValid ? MSG.FIELD_PW_REQUIREMENT : ""
-        );
+        var hasContent = val.length > 0;
+
+        // Drive input border state directly (avoids textContent side-effect of setFieldState)
+        _els.PASSWORD.classList.toggle("kfa-isSuccess", isValid);
+        _els.PASSWORD.classList.toggle("kfa-hasError", hasContent && !isValid);
+
+        // Colour the pre-populated hint: red when invalid + has content, neutral otherwise
+        if (_els.MSG_PASSWORD) {
+          _els.MSG_PASSWORD.classList.toggle("kfa-hasError", hasContent && !isValid);
+          _els.MSG_PASSWORD.classList.toggle("kfa-isSuccess", isValid);
+        }
+
+        _state.fieldValidity.password = isValid;
+        evaluateSubmitState();
       });
     }
 

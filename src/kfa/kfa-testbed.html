@@ -14,6 +14,7 @@
             --_color-primary---utility--light-gray:      #dad8d6;
             --_color-primary---neutral--neutral-200:     #e5e7eb;
             --_color-emerald---emerald--emerald-950:     #05c690;
+            --_color-emerald---emerald-dark:             #009b77;
             --_typography-colors--text-base:             #053328;
             --_inputs--forms--input-label:               #8c8c8c;
             --_components---input--font-size:            1.125rem;
@@ -39,23 +40,19 @@
             padding: 2rem;
         }
 
-        /* STYLES BEGIN */
 
         /* ── Form panel ── */
-        #kfaRegForm {
+        #kfaRegForm.testing-layout {
             background: #fff;
-            padding: 2rem;
-            border: 1px solid var(--korn-ferry-mast-library_color-primary---utility--light-gray, var(--_color-primary---utility--light-gray, #dad8d6));
+            padding: 60px;
+            margin: 0 auto;
+            max-width: 820px;
         }
 
-        #kfaRegForm > legend {
-            font-size: .75rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: .05em;
-            color: #888;
-            margin-bottom: 1.5rem;
-        }
+
+        /* STYLES BEGIN */
+
+
 
         /* ── Name row: two columns ── */
         .kfa-name-row {
@@ -74,14 +71,14 @@
             display: flex;
             flex-direction: column;
             gap: .25rem;
-            margin-bottom: 1.25rem;
+            margin-bottom: 1rem;
         }
 
         /* ── Account type: label inline with toggle ── */
         .kfa-field--row {
             flex-direction: row;
             align-items: center;
-            gap: 1.5rem;
+            gap: 1.875rem;
         }
 
         .kfa-field--row > label {
@@ -99,8 +96,7 @@
         }
 
         /* ── Field labels — Style B: forest green, no uppercase ── */
-        .kfa-field label,
-        .kfa-field > legend {
+        .kfa-field label {
             font-size: var(--korn-ferry-mast-library_components---input-label--font-size, var(--_components---input-label--font-size, 14px));
             font-weight: var(--korn-ferry-mast-library_components---input-label--font-weight, var(--_components---input-label--font-weight, 500));
             color: var(--korn-ferry-mast-library_color-primary---forest--forest-950, var(--_color-primary---forest--forest-950, #00634f));
@@ -108,6 +104,13 @@
             letter-spacing: -0.2px;
             text-transform: none;
             margin-bottom: 0;
+        }
+
+        /* Required field asterisk — text-colored (forest green), matches label */
+        .kfa-field:has(input[required]) > label::after,
+        .kfa-field:has(.kfa-pw-row input[required]) > label::after {
+            content: " *";
+            color: var(--korn-ferry-mast-library_color-primary---forest--forest-950, var(--_color-primary---forest--forest-950, #00634f));
         }
 
         /* ── Text / email / password inputs ── */
@@ -118,7 +121,7 @@
             font-size: var(--korn-ferry-mast-library_components---input--font-size, var(--_components---input--font-size, 1.125rem));
             font-weight: var(--korn-ferry-mast-library_components---input--font-weight, var(--_components---input--font-weight, 400));
             line-height: var(--korn-ferry-mast-library_components---input--line-height, var(--_components---input--line-height, 1.5em));
-            padding: 1rem;
+            padding: var(--korn-ferry-mast-library_components---button--vertical-padding, var(--_components---button--vertical-padding, .75rem)) var(--korn-ferry-mast-library_components---button--horizontal-padding, var(--_components---button--horizontal-padding, .75rem));
             border: 1px solid var(--korn-ferry-mast-library_color-primary---utility--light-gray, var(--_color-primary---utility--light-gray, #dad8d6));
             background-color: #fff;
             color: var(--korn-ferry-mast-library_color-primary---forest--forest-950, var(--_color-primary---forest--forest-950, #00634f));
@@ -185,14 +188,7 @@
             fill: rgba(0, 0, 0, 0.5);
         }
 
-        /* ── Password requirement hint ── */
-        .kfa-hint {
-            font-size: 14px;
-            font-weight: 400;
-            line-height: 150%;
-            color: var(--korn-ferry-mast-library---typography-colors--text-base, var(--_typography-colors--text-base, #053328));
-            margin: 0;
-        }
+        /* ── Password hint — lives in #kfaMsgPassword (pre-populated); neutral by default ── */
 
         /* ── Divider ── */
         .kfa-divider {
@@ -218,7 +214,8 @@
             justify-content: center;
             padding: 1rem;
             cursor: pointer;
-            font-size: var(--korn-ferry-mast-library_components---input--font-size, var(--_components---input--font-size, 1.125rem));
+            font-size: 1rem;
+            line-height: 112%;
             font-weight: 700;
             color: rgba(0, 0, 0, .5);
             background: transparent;
@@ -274,7 +271,7 @@
         [role="checkbox"][aria-checked="true"]::after {
             content: "";
             position: absolute;
-            left: .2rem;
+            left: .25rem;
             top: .05rem;
             width: .25rem;
             height: .5rem;
@@ -302,17 +299,12 @@
             text-underline-offset: auto;
         }
 
-        /* Marketing opt-in: border-top separator (Style B pattern) */
-        .kfa-field:has(#kfaMarketing) {
-            border-top: 1px solid var(--korn-ferry-mast-library_color-primary---neutral--neutral-200, var(--_color-primary---neutral--neutral-200, #e5e7eb));
-            padding-top: 1.5rem;
-            margin-top: .5rem;
-        }
 
         /* ── Inline field messages ── */
+        /* Default is neutral — red only applied via .kfa-hasError so pre-populated hint stays calm */
         .kfa-msg {
             font-size: .8rem;
-            color: #c00;
+            color: var(--korn-ferry-mast-library---typography-colors--text-base, var(--_typography-colors--text-base, #053328));
             min-height: 1em;
         }
 
@@ -349,7 +341,7 @@
 
         /* ── Submit row ── */
         .kfa-submit-row {
-            padding-top: 2rem;
+            padding-top: 1rem;
         }
 
         #kfaSubmit {
@@ -358,17 +350,35 @@
             background: var(--korn-ferry-mast-library_color-primary---forest--forest-950, var(--_color-primary---forest--forest-950, #00634f));
             color: #fff;
             border: none;
+            outline: none;
             font-family: inherit;
-            font-size: 1rem;
+            font-size: 1.375rem; /* 22px */
             font-weight: 700;
             padding: 1.25rem;
             cursor: not-allowed;
             opacity: .5;
+            border-radius: 3px;
+            transition: background .15s ease, color .15s ease;
         }
 
+        /* Enabled states */
         #kfaSubmit:not([disabled]) {
             cursor: pointer;
             opacity: 1;
+        }
+
+        #kfaSubmit:not([disabled]):hover {
+            background: var(--korn-ferry-mast-library_color-emerald---emerald-dark, var(--_color-emerald---emerald-dark, #009b77));
+        }
+
+        #kfaSubmit:not([disabled]):active {
+            background: var(--korn-ferry-mast-library---typography-colors--text-base, var(--_typography-colors--text-base, #053328));
+            color: var(--korn-ferry-mast-library_color-emerald---emerald-dark, var(--_color-emerald---emerald-dark, #009b77));
+        }
+
+        #kfaSubmit:not([disabled]):focus-visible {
+            outline: 2px dashed var(--korn-ferry-mast-library_color-emerald---emerald--emerald-950, var(--_color-emerald---emerald--emerald-950, #05c690));
+            outline-offset: 0;
         }
 
         /* ── Status / error banners ── */
@@ -386,16 +396,16 @@
 <body>
 
 <main>
-    <form id="kfaRegForm" method="post" action="/" novalidate>
+    <form id="kfaRegForm" class="testing-layout" method="post" action="/" novalidate>
         <!-- ── Name (side by side) ── -->
         <div class="kfa-name-row">
             <div class="kfa-field">
                 <label for="kfaFirstName">First Name</label>
-                <input type="text" id="kfaFirstName" name="firstName" placeholder="Jane" required>
+                <input type="text" id="kfaFirstName" name="firstName" placeholder="First Name" required>
             </div>
             <div class="kfa-field">
                 <label for="kfaLastName">Last Name</label>
-                <input type="text" id="kfaLastName" name="lastName" placeholder="Smith" required>
+                <input type="text" id="kfaLastName" name="lastName" placeholder="Last Name" required>
             </div>
         </div>
         <span id="kfaMsgName" class="kfa-msg" aria-live="polite"></span>
@@ -403,7 +413,7 @@
         <!-- ── Email ── -->
         <div class="kfa-field">
             <label for="kfaEmail">Email Address</label>
-            <input type="email" id="kfaEmail" name="email" placeholder="jane@example.com" required>
+            <input type="email" id="kfaEmail" name="email" placeholder="E.g. name@place.com" required>
             <span id="kfaMsgEmail" class="kfa-msg" aria-live="polite"></span>
         </div>
 
@@ -411,7 +421,7 @@
         <div class="kfa-field">
             <label for="kfaPassword">Password</label>
             <div class="kfa-pw-row">
-                <input type="password" id="kfaPassword" name="password" placeholder="Create a password." required>
+                <input type="password" id="kfaPassword" name="password" placeholder="Enter a password" required>
                 <span id="kfaPwReveal"
                       role="button"
                       tabindex="0"
@@ -423,11 +433,8 @@
                     </svg>
                 </span>
             </div>
-            <p class="kfa-hint">Password must be a minimum of 8 characters with at least one upper and lower case letter and a number.</p>
-            <span id="kfaMsgPassword" class="kfa-msg" aria-live="polite"></span>
+            <span id="kfaMsgPassword" class="kfa-msg" aria-live="polite">Password must be a minimum of 8 characters with at least one upper and lower case letter and a number.</span>
         </div>
-
-        <hr class="kfa-divider">
 
         <!-- ── Account Type (label inline with toggle) ── -->
         <div class="kfa-field kfa-field--row">
@@ -444,8 +451,6 @@
 
         <!-- ── Agreements ── -->
         <fieldset style="border:none; padding:0; margin:0 0 1rem;">
-            <legend style="font-size:.875rem; font-weight:600; color:#00634f; margin-bottom:.75rem;">Agreements</legend>
-
             <!-- Privacy (required) -->
             <div class="kfa-field">
                 <div class="kfa-cb-row">
@@ -457,6 +462,8 @@
                 </div>
                 <span id="kfaMsgPrivacy" class="kfa-msg" aria-live="polite"></span>
             </div>
+
+
 
             <!-- Marketing (optional) -->
             <div class="kfa-field">

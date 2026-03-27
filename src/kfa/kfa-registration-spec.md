@@ -127,7 +127,6 @@ const DOM_IDS = {
   PASSWORD:       "kfaPassword",
   CONFIRM_PW:     "kfaConfirmPassword",   // see note §4 re: ConfirmPassword
   PW_REVEAL:      "kfaPwReveal",   // <button> or <span> toggle
-  PW_METER:       "kfaPwMeter",    // <meter> element
   CHECKBOX_PRIVACY:   "kfaPrivacy",    // hidden real checkbox
   CHECKBOX_MARKETING: "kfaMarketing",  // hidden real checkbox
   // Custom styled checkbox triggers (visual spans with role="checkbox")
