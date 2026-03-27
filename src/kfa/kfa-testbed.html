@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>KFA Testbed</title>
+    <!-- Copy of Gotham Implementation from typography.com for local testing only; should not be shipped as Webflow will provide it -->
+    <link rel="stylesheet" href="./localStyles/localGothamTesting.css" />
+
     <style>
         /* ── KF Design System tokens (mirrors example-form.html Style B) ── */
         /* Remove on transliteration to WF */
@@ -24,9 +27,10 @@
         /* ── Reset / base ── */
         *, *::before, *::after { box-sizing: border-box; }
         body {
-            font-family: var(--korn-ferry-mast-library---fonts--primary-font, var(--_fonts--primary-font, Gotham)), Arial, sans-serif;
             background: #f5f5f5;
             margin: 0;
+            font-size: 1rem;
+            font-family: Gotham A, Gotham B, Gotham, Arial, sans-serif, serif;
         }
 
         main {
@@ -35,9 +39,10 @@
             padding: 2rem;
         }
 
+        /* STYLES BEGIN */
+
         /* ── Form panel ── */
         #kfaRegForm {
-            max-width: 540px;
             background: #fff;
             padding: 2rem;
             border: 1px solid var(--korn-ferry-mast-library_color-primary---utility--light-gray, var(--_color-primary---utility--light-gray, #dad8d6));
@@ -72,15 +77,35 @@
             margin-bottom: 1.25rem;
         }
 
+        /* ── Account type: label inline with toggle ── */
+        .kfa-field--row {
+            flex-direction: row;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .kfa-field--row > label {
+            white-space: nowrap;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        @media (max-width: 767px) {
+            .kfa-field--row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: .25rem;
+            }
+        }
+
         /* ── Field labels — Style B: forest green, no uppercase ── */
         .kfa-field label,
         .kfa-field > legend {
-            font-family: var(--korn-ferry-mast-library---fonts--primary-font, var(--_fonts--primary-font, Gotham)), Arial, sans-serif;
             font-size: var(--korn-ferry-mast-library_components---input-label--font-size, var(--_components---input-label--font-size, 14px));
             font-weight: var(--korn-ferry-mast-library_components---input-label--font-weight, var(--_components---input-label--font-weight, 500));
             color: var(--korn-ferry-mast-library_color-primary---forest--forest-950, var(--_color-primary---forest--forest-950, #00634f));
             line-height: 32px;
-            letter-spacing: -0.28px;
+            letter-spacing: -0.2px;
             text-transform: none;
             margin-bottom: 0;
         }
@@ -89,14 +114,14 @@
         .kfa-field input[type="text"],
         .kfa-field input[type="email"],
         .kfa-field input[type="password"] {
-            font-family: var(--korn-ferry-mast-library---fonts--primary-font, var(--_fonts--primary-font, Gotham)), Arial, sans-serif;
+            font-family: inherit;
             font-size: var(--korn-ferry-mast-library_components---input--font-size, var(--_components---input--font-size, 1.125rem));
             font-weight: var(--korn-ferry-mast-library_components---input--font-weight, var(--_components---input--font-weight, 400));
             line-height: var(--korn-ferry-mast-library_components---input--line-height, var(--_components---input--line-height, 1.5em));
             padding: 1rem;
             border: 1px solid var(--korn-ferry-mast-library_color-primary---utility--light-gray, var(--_color-primary---utility--light-gray, #dad8d6));
             background-color: #fff;
-            color: var(--korn-ferry-mast-library---typography-colors--text-base, var(--_typography-colors--text-base, #053328));
+            color: var(--korn-ferry-mast-library_color-primary---forest--forest-950, var(--_color-primary---forest--forest-950, #00634f));
             width: 100%;
             appearance: none;
         }
@@ -110,21 +135,23 @@
             border-color: var(--korn-ferry-mast-library_color-emerald---emerald--emerald-950, var(--_color-emerald---emerald--emerald-950, #05c690));
         }
 
-        /* ── Password row (input + reveal toggle) ── */
+        /* ── Password row (input with absolutely-positioned reveal icon) ── */
         .kfa-pw-row {
-            display: flex;
-            align-items: center;
+            position: relative;
             border: 1px solid var(--korn-ferry-mast-library_color-primary---utility--light-gray, var(--_color-primary---utility--light-gray, #dad8d6));
         }
 
-        .kfa-pw-row input {
-            flex: 1;
-            padding: 1rem;
-            border: none;
-            font-family: var(--korn-ferry-mast-library---fonts--primary-font, var(--_fonts--primary-font, Gotham)), Arial, sans-serif;
+        /* Override the base input rule to add right padding for the icon */
+        .kfa-pw-row input[type="password"],
+        .kfa-pw-row input[type="text"] {
+            font-family: inherit;
             font-size: var(--korn-ferry-mast-library_components---input--font-size, var(--_components---input--font-size, 1.125rem));
-            color: var(--korn-ferry-mast-library---typography-colors--text-base, var(--_typography-colors--text-base, #053328));
+            color: var(--korn-ferry-mast-library_color-primary---forest--forest-950, var(--_color-primary---forest--forest-950, #00634f));
             background: #fff;
+            border: none;
+            width: 100%;
+            padding: 1rem 3rem 1rem 1rem;
+            display: block;
         }
 
         .kfa-pw-row input:focus { outline: none; }
@@ -133,18 +160,38 @@
             border-color: var(--korn-ferry-mast-library_color-emerald---emerald--emerald-950, var(--_color-emerald---emerald--emerald-950, #05c690));
         }
 
+        /* ── Password reveal — absolutely positioned icon ── */
         #kfaPwReveal {
-            padding: 0 1rem;
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1.125rem;  /* 18px */
+            height: 2rem;     /* 32px */
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            font-size: var(--korn-ferry-mast-library_components---input-label--font-size, var(--_components---input-label--font-size, 14px));
-            color: var(--korn-ferry-mast-library_color-primary---forest--forest-950, var(--_color-primary---forest--forest-950, #00634f));
             user-select: none;
-            white-space: nowrap;
+            padding: 0;
+            background: none;
+            border: none;
         }
 
-        #kfaPwMeter {
+        #kfaPwReveal svg {
             width: 100%;
-            height: 4px;
+            height: auto;
+            display: block;
+            fill: rgba(0, 0, 0, 0.5);
+        }
+
+        /* ── Password requirement hint ── */
+        .kfa-hint {
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 150%;
+            color: var(--korn-ferry-mast-library---typography-colors--text-base, var(--_typography-colors--text-base, #053328));
+            margin: 0;
         }
 
         /* ── Divider ── */
@@ -157,8 +204,10 @@
         /* ── Account type toggle (radio) ── */
         .kfa-toggle-track {
             display: flex;
-            border: 1px solid var(--korn-ferry-mast-library_color-primary---utility--light-gray, var(--_color-primary---utility--light-gray, #dad8d6));
+            flex: 1;
+            border-radius: 3px;
             background: var(--korn-ferry-mast-library_color-primary---utility--light-gray, var(--_color-primary---utility--light-gray, #dad8d6));
+            box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.25) inset;
             overflow: hidden;
         }
 
@@ -172,7 +221,7 @@
             font-size: var(--korn-ferry-mast-library_components---input--font-size, var(--_components---input--font-size, 1.125rem));
             font-weight: 700;
             color: rgba(0, 0, 0, .5);
-            background: var(--korn-ferry-mast-library_color-primary---utility--light-gray, var(--_color-primary---utility--light-gray, #dad8d6));
+            background: transparent;
             transition: background .15s, color .15s;
         }
 
@@ -182,10 +231,10 @@
             pointer-events: none;
         }
 
-        /* Highlight checked option via sibling combinator */
+        /* Active segment: emerald gradient */
         #toggleFree:checked  ~ label[for="toggleFree"],
         #togglePaid:checked  ~ label[for="togglePaid"] {
-            background: var(--korn-ferry-mast-library_color-primary---forest--forest-950, var(--_color-primary---forest--forest-950, #00634f));
+            background: linear-gradient(180deg, #05C690 17.71%, #009B77 90.44%);
             color: #fff;
         }
 
@@ -196,28 +245,42 @@
             pointer-events: none;
         }
 
-        /* ── Custom checkbox box ── */
+        /* ── Custom checkbox row — cursor only on the box ── */
         .kfa-cb-row {
             display: flex;
             align-items: flex-start;
             gap: 1rem;
-            cursor: pointer;
         }
 
         [role="checkbox"] {
+            position: relative;
             display: inline-block;
-            width: 1em;
-            height: 1em;
+            width: 1rem;
+            height: 1rem;
             border: 2px solid var(--korn-ferry-mast-library---inputs--forms--input-label, var(--_inputs--forms--input-label, #8c8c8c));
             background: transparent;
             flex-shrink: 0;
             margin-top: .15em;
-            font-size: 13px;
+            cursor: pointer;
+            border-radius: 2px;
         }
 
         [role="checkbox"][aria-checked="true"] {
             background: var(--korn-ferry-mast-library_color-emerald---emerald--emerald-950, var(--_color-emerald---emerald--emerald-950, #05c690));
             border-color: var(--korn-ferry-mast-library_color-emerald---emerald--emerald-950, var(--_color-emerald---emerald--emerald-950, #05c690));
+        }
+
+        /* Checkmark: two-sided rotated pseudo-element */
+        [role="checkbox"][aria-checked="true"]::after {
+            content: "";
+            position: absolute;
+            left: .2rem;
+            top: .05rem;
+            width: .25rem;
+            height: .5rem;
+            border-right: 2px solid #fff;
+            border-bottom: 2px solid #fff;
+            transform: rotate(40deg);
         }
 
         /* ── Checkbox / consent label text ── */
@@ -253,9 +316,40 @@
             min-height: 1em;
         }
 
+        /* ─────────────────────────────────────────────────
+           JS-applied state classes
+           ───────────────────────────────────────────────── */
+
+        /* Inputs */
+        .kfa-field input.kfa-isSuccess { border-color: var(--korn-ferry-mast-library_color-emerald---emerald--emerald-950, var(--_color-emerald---emerald--emerald-950, #05c690)); }
+        .kfa-field input.kfa-hasError  { border-color: #c00; }
+
+        /* Password wrapper mirrors inner input state */
+        .kfa-pw-row:has(input.kfa-isSuccess) { border-color: var(--korn-ferry-mast-library_color-emerald---emerald--emerald-950, var(--_color-emerald---emerald--emerald-950, #05c690)); }
+        .kfa-pw-row:has(input.kfa-hasError)  { border-color: #c00; }
+
+        /* Message spans */
+        .kfa-msg.kfa-isSuccess { color: var(--korn-ferry-mast-library_color-primary---forest--forest-950, var(--_color-primary---forest--forest-950, #00634f)); }
+        .kfa-msg.kfa-hasError  { color: #c00; }
+
+        /* Custom checkbox error */
+        [role="checkbox"].kfa-hasError { border-color: #c00; }
+
+        /* Banners — hidden until JS adds .kfa-isVisible */
+        #kfaError.kfa-isVisible,
+        #kfaStatus.kfa-isVisible { display: block; }
+
+        /* Submit loading */
+        #kfaSubmit.kfa-isLoading { cursor: wait; opacity: .7; }
+
+        /* Loading indicator */
+        #kfaLoading { display: none; font-size: .85rem; color: var(--korn-ferry-mast-library_color-primary---forest--forest-950, var(--_color-primary---forest--forest-950, #00634f)); margin-top: .5rem; }
+        #kfaLoading.kfa-isActive { display: block; }
+        #kfaLoading.kfa-isActive::after { content: "Loading…"; }
+
         /* ── Submit row ── */
         .kfa-submit-row {
-            padding-top: 3rem;
+            padding-top: 2rem;
         }
 
         #kfaSubmit {
@@ -264,7 +358,7 @@
             background: var(--korn-ferry-mast-library_color-primary---forest--forest-950, var(--_color-primary---forest--forest-950, #00634f));
             color: #fff;
             border: none;
-            font-family: var(--korn-ferry-mast-library---fonts--primary-font, var(--_fonts--primary-font, Gotham)), Arial, sans-serif;
+            font-family: inherit;
             font-size: 1rem;
             font-weight: 700;
             padding: 1.25rem;
@@ -275,14 +369,6 @@
         #kfaSubmit:not([disabled]) {
             cursor: pointer;
             opacity: 1;
-        }
-
-        #kfaLoading {
-            display: block;
-            font-size: .85rem;
-            color: #555;
-            min-height: 1em;
-            margin-top: .5rem;
         }
 
         /* ── Status / error banners ── */
@@ -301,8 +387,6 @@
 
 <main>
     <form id="kfaRegForm" method="post" action="/" novalidate>
-        <legend>KFA Registration — Testbed</legend>
-
         <!-- ── Name (side by side) ── -->
         <div class="kfa-name-row">
             <div class="kfa-field">
@@ -327,17 +411,26 @@
         <div class="kfa-field">
             <label for="kfaPassword">Password</label>
             <div class="kfa-pw-row">
-                <input type="password" id="kfaPassword" name="password" placeholder="Create a password" required>
-                <span id="kfaPwReveal">Show</span>
+                <input type="password" id="kfaPassword" name="password" placeholder="Create a password." required>
+                <span id="kfaPwReveal"
+                      role="button"
+                      tabindex="0"
+                      aria-label="Show password"
+                      aria-controls="kfaPassword"
+                      aria-pressed="false">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" aria-hidden="true" focusable="false">
+                        <path d="M117.2 136C160.3 96 217.6 64 288 64s127.7 32 170.8 72c43.1 40 71.9 88 85.2 120c-13.3 32-42.1 80-85.2 120c-43.1 40-100.4 72-170.8 72s-127.7-32-170.8-72C74.1 336 45.3 288 32 256c13.3-32 42.1-80 85.2-120zM288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM192 256a96 96 0 1 1 192 0 96 96 0 1 1 -192 0zm224 0a128 128 0 1 0 -256 0 128 128 0 1 0 256 0z"/>
+                    </svg>
+                </span>
             </div>
-            <meter id="kfaPwMeter" min="0" max="4" value="0"></meter>
+            <p class="kfa-hint">Password must be a minimum of 8 characters with at least one upper and lower case letter and a number.</p>
             <span id="kfaMsgPassword" class="kfa-msg" aria-live="polite"></span>
         </div>
 
         <hr class="kfa-divider">
 
-        <!-- ── Account Type (before agreements) ── -->
-        <div class="kfa-field">
+        <!-- ── Account Type (label inline with toggle) ── -->
+        <div class="kfa-field kfa-field--row">
             <label>Account Type</label>
             <div class="kfa-toggle-track">
                 <input type="radio" id="toggleFree" name="regType" value="free" checked>
@@ -359,7 +452,7 @@
                     <input type="checkbox" id="kfaPrivacy" name="privacy" class="kfa-hidden-cb" required>
                     <span id="kfaPrivacyCustom" role="checkbox" aria-checked="false" tabindex="0" aria-labelledby="kfaPrivacyLabel"></span>
                     <span id="kfaPrivacyLabel" class="kfa-cb-label">
-                        I agree to the <a href="#">Global Privacy Policy</a> (required)
+                        I confirm my consent to the collection, use and sharing of my information as solely described in the <a href="/content/dam/kf-advance/documents/legal/privacy.pdf" class="policy-link">Global Privacy Policy</a>. In addition, I acknowledge that I am not a citizen or national of, or ordinarily resident in an Embargoed Location. Korn Ferry may not provide services to individuals located or ordinarily resident in an embargoed location, including Cuba, Iran, North Korea, Syria, or the Crimea, Donetsk, or Luhansk regions of Ukraine ("Embargoed Location").
                     </span>
                 </div>
                 <span id="kfaMsgPrivacy" class="kfa-msg" aria-live="polite"></span>
@@ -389,5 +482,6 @@
     </form>
 </main>
 
+<script src="kfa-registration.js"></script>
 </body>
 </html>
