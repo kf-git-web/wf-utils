@@ -80,6 +80,11 @@
     PARTNER:   "PARTNER_EMAIL_FOUND",
   };
 
+  // --- Register response error codes ---
+  var REGISTER_CODE = {
+    BAD_PASSWORD: "BAD_PASSWORD",
+  };
+
   // --- GTM dataLayer event values ---
   var TRACKING = {
     SUCCESS_FREE:     "marketing-freemium-registration",
@@ -175,7 +180,7 @@
   };
 
   Validator.prototype.isValidEmail = function (value) {
-    return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value);
+    return /^\w+([+\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value);
   };
 
   Validator.prototype.scorePassword = function (value) {
@@ -227,7 +232,15 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     }).then(function (res) {
-      if (!res.ok) throw new Error(res.status);
+      if (!res.ok) {
+        return res.json().then(function (data) {
+          var err = new Error(data.Code || String(res.status));
+          err.code = data.Code || null;
+          throw err;
+        }, function () {
+          throw new Error(String(res.status));
+        });
+      }
       return res.json();
     });
   };
@@ -499,6 +512,10 @@
       })
       .catch(function (err) {
         console.warn("[" + MODULE + "] register failed: " + err.message);
+        if (err.code === REGISTER_CODE.BAD_PASSWORD) {
+          handleError(MSG.FIELD_PW_REQUIREMENT);
+          return;
+        }
         regTracking({
           regValue: "register-error",
           regType:  TRACKING.ERROR_FAILURE,
