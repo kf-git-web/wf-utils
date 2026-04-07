@@ -170,10 +170,10 @@ Pushes to `window.dataLayer` on every meaningful outcome:
 
 ## Open Items
 
-| # | Item | Owner |
-|---|------|-------|
-| A | Confirm fallback URL for `PARTNER_EMAIL_FOUND` redirect | Client |
-| B | API team must allowlist Webflow staging origin for `register` (`withCredentials`) | Client / API team |
-| C | Test whether server rejects passwords that pass the client-side regex | Dev — test once `DRY_RUN=false` |
-| D | Confirm `PARTNER_EMAIL_FOUND` redirect message copy is still current | Client |
-| E | Confirm GTM dataLayer shape matches active tag configuration | Client |
+| # | Item                                                                              | Owner             | Update                                             |
+|---|-----------------------------------------------------------------------------------|-------------------|----------------------------------------------------|
+| A | Confirm fallback URL for `PARTNER_EMAIL_FOUND` redirect                           | Client            |                                                    |
+| B | API team must allowlist Webflow staging origin for `register` (`withCredentials`) | Client / API team |                                                    |
+| C | Test whether server rejects passwords that pass the client-side regex             | Any               | CONFIRMED, the server DOES reject unfit passwords. |
+| D | Confirm `PARTNER_EMAIL_FOUND` redirect message copy is still current              | Client            |                                                    |
+| E | Confirm GTM dataLayer shape matches active tag configuration                      | Client            |                                                    |
