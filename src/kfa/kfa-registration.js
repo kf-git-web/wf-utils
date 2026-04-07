@@ -489,13 +489,6 @@
   // ─────────────────────────────────────────────────────────────────────────
 
   function handleRegister(payload) {
-    if (DRY_RUN) {
-      console.log("[" + MODULE + "] DRY_RUN enabled — payload logged, registration skipped", payload);
-      setLoading(false);
-      _state.isSubmitting = false;
-      return;
-    }
-
     api.register(payload)
       .then(function (data) {
         regTracking({
@@ -530,6 +523,14 @@
   // ─────────────────────────────────────────────────────────────────────────
 
   function handleVerify(payload) {
+    if (DRY_RUN) {
+      console.log("[" + MODULE + "] DRY_RUN — verifyemail payload:", { UserName: payload.UserName, PartnerKey: PARTNER_KEY, Context: "registration" });
+      console.log("[" + MODULE + "] DRY_RUN — register payload:", payload);
+      setLoading(false);
+      _state.isSubmitting = false;
+      return;
+    }
+
     setLoading(true);
     api.verifyEmail({ UserName: payload.UserName, PartnerKey: PARTNER_KEY, Context: "registration" })
       .then(function (data) {
